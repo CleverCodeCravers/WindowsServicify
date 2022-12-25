@@ -50,6 +50,7 @@ The windows service will, when started,
 - execute the named command line in the named working directory. 
 - It will continously watch it.
 - When the process crashes or stops, it will log the crash and automatically restart the process.
+- All outputs of the process are written into the log files.
 
 
 
