@@ -44,4 +44,12 @@ The log files contain all the script output with date/timestamps in front of eac
   - [2023-01-01 10:35:23] Hello world
 ```
 
+## About the execution
+
+The windows service will, when started, 
+- execute the named command line in the named working directory. 
+- It will continously watch it.
+- When the process crashes or stops, it will log the crash and automatically restart the process.
+
+
 
