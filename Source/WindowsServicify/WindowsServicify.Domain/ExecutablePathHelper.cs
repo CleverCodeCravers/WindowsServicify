@@ -6,8 +6,14 @@ public class ExecutablePathHelper
 {
     public static string GetExecutablePath()
     {
-        string exeLocation = Assembly.GetExecutingAssembly().Location;
-        string exeDirectory = Path.GetDirectoryName(exeLocation)!;
+        var exeLocation = GetExecutableFilePath();
+        var exeDirectory = Path.GetDirectoryName(exeLocation)!;
+        
         return exeDirectory;
+    }
+
+    public static string GetExecutableFilePath()
+    {
+        return Assembly.GetExecutingAssembly().Location;
     }
 }

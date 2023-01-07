@@ -2,7 +2,7 @@
   "profiles": {
     "WindowsServicify.ConsoleApp": {
       "commandName": "Project",
-      "commandLineArgs": "--testrun"
+      "commandLineArgs": "--install"
     }
   }
 }

@@ -10,7 +10,7 @@ public class WindowsBackgroundService : BackgroundService
 
     public WindowsBackgroundService(
         ProcessManager processManager,
-        ILogger<WindowsBackgroundService> logger)
+        ILogger<WindowsBackgroundService> logger) 
     {
         _processManager = processManager;
         _logger = logger;

@@ -50,6 +50,18 @@ if (runningInConsole)
         processManager.Stop();
     }
 
+    if (parameters.Install)
+    {
+        var configData = ServiceConfigurationFileHandler.Load(configurationFilePath);
+        WindowsServiceInstallHelper.InstallService(configData.ServiceName, ExecutablePathHelper.GetExecutableFilePath());
+    }
+
+    if (parameters.Uninstall)
+    {
+        var configData = ServiceConfigurationFileHandler.Load(configurationFilePath);
+        WindowsServiceInstallHelper.RemoveService(configData.ServiceName);
+    }
+    
     return;
 }
 
