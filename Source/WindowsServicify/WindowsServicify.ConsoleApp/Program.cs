@@ -1,42 +1,79 @@
-﻿using WindowsServicify.Domain;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Configuration;
+using Microsoft.Extensions.Logging.EventLog;
+using WindowsServicify.Domain;
 
-var parser = new ConsoleCommandLineParser();
-
-var commandLineParametersResult = parser.Parse(args);
-
-if (!commandLineParametersResult.IsSuccess)
-{
-    Console.WriteLine("Unfortunately there have been problems with the command line arguments.");
-    return;
-}
+var runningInConsole = Environment.UserInteractive;
 var configurationFilePath = Path.Combine(ExecutablePathHelper.GetExecutablePath(), "config.json");
 
-var parameters = commandLineParametersResult.Value;
-
-if (parameters.Configure)
+if (runningInConsole)
 {
-    Console.WriteLine("Please enter the necessary configuration data:");
-    var configData = ServiceConfigurationRequester.GetServiceConfiguration();
-    ServiceConfigurationFileHandler.Save(configurationFilePath,configData);
+    var parser = new ConsoleCommandLineParser();
+
+    var commandLineParametersResult = parser.Parse(args);
+
+    if (!commandLineParametersResult.IsSuccess)
+    {
+        Console.WriteLine("Unfortunately there have been problems with the command line arguments.");
+        return;
+    }
+
+    var parameters = commandLineParametersResult.Value;
+
+    if (parameters.Configure)
+    {
+        Console.WriteLine("Please enter the necessary configuration data:");
+        var configData = ServiceConfigurationRequester.GetServiceConfiguration();
+        ServiceConfigurationFileHandler.Save(configurationFilePath,configData);
+        return;
+    }
+
+    if (parameters.Testrun)
+    {
+        var configData = ServiceConfigurationFileHandler.Load(configurationFilePath);
+        var processManager = new ProcessManager(configData.Command, configData.WorkingDirectory, configData.Arguments);
+        Console.WriteLine("Process starting...");
+        processManager.Start();
+        while (!Console.KeyAvailable)
+        {
+            Console.Write(".");
+            if (!processManager.IsCorrectlyRunning())
+            {
+                Console.WriteLine("Restarting process...");
+                processManager.Start();
+            }
+            Thread.Sleep(1000);
+        }
+        Console.WriteLine("Good bye!");
+        processManager.Stop();
+    }
+
     return;
 }
 
-if (parameters.Testrun)
-{
-    var configData = ServiceConfigurationFileHandler.Load(configurationFilePath);
-    var processManager = new ProcessManager(configData.Command, configData.WorkingDirectory, configData.Arguments);
-    Console.WriteLine("Process starting...");
-    processManager.Start();
-    while (!Console.KeyAvailable)
+var configuration = ServiceConfigurationFileHandler.Load(configurationFilePath);
+
+using IHost host = Host.CreateDefaultBuilder(args)
+    .UseWindowsService(options =>
     {
-        Console.Write(".");
-        if (!processManager.IsCorrectlyRunning())
-        {
-            Console.WriteLine("Restarting process...");
-            processManager.Start();
-        }
-        Thread.Sleep(1000);
-    }
-    Console.WriteLine("Good bye!");
-    processManager.Stop();
-}
+        options.ServiceName = configuration.ServiceName;
+    })
+    .ConfigureServices(services =>
+    {
+        LoggerProviderOptions.RegisterProviderOptions<EventLogSettings, EventLogLoggerProvider>(services);
+
+        services.AddSingleton(new ProcessManager(configuration.Command, configuration.WorkingDirectory, configuration.Arguments));
+        services.AddHostedService<WindowsBackgroundService>();
+    })
+    .ConfigureLogging((context, logging) =>
+    {
+        // See: https://github.com/dotnet/runtime/issues/47303
+        logging.AddConfiguration(
+            context.Configuration.GetSection("Logging"));
+    })
+    .Build();
+
+await host.RunAsync();
+
