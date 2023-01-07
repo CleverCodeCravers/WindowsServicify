@@ -14,6 +14,6 @@ public class ExecutablePathHelper
 
     public static string GetExecutableFilePath()
     {
-        return Assembly.GetExecutingAssembly().Location;
+        return Assembly.GetEntryAssembly()!.Location;
     }
 }
