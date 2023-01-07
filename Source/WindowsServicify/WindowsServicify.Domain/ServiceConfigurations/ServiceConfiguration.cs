@@ -5,4 +5,5 @@ public record ServiceConfiguration(
     string DisplayName,
     string Description,
     string Command,
-    string WorkingDirectory);
+    string WorkingDirectory,
+    string Arguments);

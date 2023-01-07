@@ -20,7 +20,7 @@ public class ProcessManager
     public void Start()
     {
         shouldRun = true;
-        StartProcessAsync();
+        StartProcess();
     }
 
     public void Stop()
@@ -32,20 +32,17 @@ public class ProcessManager
     public bool IsCorrectlyRunning()
     {
         return !process.HasExited;
-
     }
     
-    
-
-    private async void StartProcessAsync()
+    private void StartProcess()
     {
         process = new Process();
         process.StartInfo.FileName = _command;
         process.StartInfo.Arguments = _arguments;
         process.StartInfo.WorkingDirectory = _workingDirectory;
-        await Task.Run(() => process.Start());
+        process.Start();
     }
-
+    
     private void StopProcess()
     {
         if (process != null && !process.HasExited)

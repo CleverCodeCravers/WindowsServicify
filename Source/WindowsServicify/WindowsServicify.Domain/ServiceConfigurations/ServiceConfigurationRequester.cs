@@ -9,9 +9,10 @@
             var displayName = ConsoleInput.ReadInput("Enter the display name you'd like: ", true);
             var description = ConsoleInput.ReadInput("Enter the service description you'd like: ", false);
             var command = ConsoleInput.ReadInput("Enter the command you'd like to execute: ", true);
+            var arguments = ConsoleInput.ReadInput("Enter command arguments: ", false);
             var directory = ConsoleInput.ReadInput("Working directory for the command: ", true);
 
-            return new ServiceConfiguration(serviceName, displayName, description, command, directory);
+            return new ServiceConfiguration(serviceName, displayName, description, command, directory, arguments);
         }
         
     }
