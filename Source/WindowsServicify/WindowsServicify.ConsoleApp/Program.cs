@@ -15,5 +15,6 @@ var parameters = commandLineParametersResult.Value;
 if (parameters.Configure)
 {
     Console.WriteLine("Hey There, Let's Configure Windows Servicify Together!");
-    new ServiceConfiguration().ConfigureService();
+    var configData = ServiceConfigurationRequester.GetServiceConfiguration();
+    ServiceConfigurationFileHandler.Save(Path.Combine(Directory.GetCurrentDirectory(), "config.json"),configData);
 }
