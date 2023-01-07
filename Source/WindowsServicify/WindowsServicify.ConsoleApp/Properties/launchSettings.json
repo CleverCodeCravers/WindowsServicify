@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "WindowsServicify.ConsoleApp": {
+      "commandName": "Project",
+      "commandLineArgs": "--install"
+    }
+  }
+}
