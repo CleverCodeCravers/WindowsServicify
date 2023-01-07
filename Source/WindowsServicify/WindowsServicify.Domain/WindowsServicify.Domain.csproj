@@ -8,5 +8,6 @@
 	
 	<ItemGroup>
 		<PackageReference Include="CSharp-CommandLineArgumentsParser" Version="1.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.0" />
 	</ItemGroup>
 </Project>
