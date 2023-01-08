@@ -53,7 +53,9 @@ if (runningInConsole)
     if (parameters.Install)
     {
         var configData = ServiceConfigurationFileHandler.Load(configurationFilePath);
-        WindowsServiceInstallHelper.InstallService(configData.ServiceName, ExecutablePathHelper.GetExecutableFilePath());
+        WindowsServiceInstallHelper.InstallService(configData.ServiceName, 
+            ExecutablePathHelper.GetExecutableFilePath()
+            );
     }
 
     if (parameters.Uninstall)
@@ -61,7 +63,7 @@ if (runningInConsole)
         var configData = ServiceConfigurationFileHandler.Load(configurationFilePath);
         WindowsServiceInstallHelper.RemoveService(configData.ServiceName);
     }
-    
+
     return;
 }
 

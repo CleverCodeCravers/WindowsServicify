@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
 
 namespace WindowsServicify.Domain;
 
@@ -14,6 +14,6 @@ public class ExecutablePathHelper
 
     public static string GetExecutableFilePath()
     {
-        return Assembly.GetExecutingAssembly()!.Location;
+        return Process.GetCurrentProcess().MainModule.FileName;
     }
 }
