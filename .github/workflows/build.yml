@@ -17,7 +17,7 @@ jobs:
         include:
           - os: windows-latest
             RUNTIMEID: win-x64
-            OUTPUTDIR: lsb-win-x64
+            OUTPUTDIR: servicify-win-x64
 
     steps:
       - uses: actions/checkout@v2
