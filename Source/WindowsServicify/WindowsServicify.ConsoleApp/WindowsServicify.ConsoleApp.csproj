@@ -8,7 +8,6 @@
   </PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\WindowsServicify.Domain.Tests\WindowsServicify.Domain.Tests.csproj" />
 	  <ProjectReference Include="..\WindowsServicify.Domain\WindowsServicify.Domain.csproj" />
 	</ItemGroup>
 </Project>
