@@ -1,4 +1,4 @@
-﻿using CSharp_CommandLineArgumentsParser;
+﻿using CommandLineArgumentsParser;
 
 namespace WindowsServicify.Domain;
 public class ConsoleCommandLineParser
