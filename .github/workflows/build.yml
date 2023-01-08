@@ -6,6 +6,7 @@ env:
   SOLUTION_DIR: "WindowsServicify"
   PROJECT: "./WindowsServicify.ConsoleApp/WindowsServicify.ConsoleApp.csproj"
   RELEASEPREFIX: "WindowsServicify"
+  OUTPUTPREFIX: "WindowsServicify-"
 
 jobs:
   build:
@@ -17,7 +18,7 @@ jobs:
         include:
           - os: windows-latest
             RUNTIMEID: win-x64
-            OUTPUTDIR: lsb-win-x64
+            OUTPUTDIR: ${{ env.OUTPUTPREFIX }}-win-x64
 
     steps:
       - uses: actions/checkout@v2
