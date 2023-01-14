@@ -3,15 +3,28 @@
 namespace WindowsServicify.Domain;
 public class ConsoleCommandLineParser
 {
-    public Result<ConsoleCommandLineParameters> Parse(string[] args)
+
+    public ICommandLineOption[] GetCommandsList()
+    {
+        var parser = this.ParseArgs();
+        return parser.GetCommandsList();
+    }
+    private Parser ParseArgs()
     {
         var parser = new Parser(
             new ICommandLineOption[] {
                 new BoolCommandLineOption("--configure"),
                 new BoolCommandLineOption("--install"),
                 new BoolCommandLineOption("--uninstall"),
-                new BoolCommandLineOption("--testrun")
+                new BoolCommandLineOption("--testrun"),
+                new BoolCommandLineOption("--help")
             });
+
+        return parser;
+    }
+    public Result<ConsoleCommandLineParameters> Parse(string[] args)
+    {
+        var parser = this.ParseArgs();
 
         if (!parser.TryParse(args, true) || args.Length == 0)
         {
@@ -23,7 +36,8 @@ public class ConsoleCommandLineParser
                 parser.GetBoolOption("--configure"),
                 parser.GetBoolOption("--install"),
                 parser.GetBoolOption("--uninstall"),
-                parser.GetBoolOption("--testrun")
+                parser.GetBoolOption("--testrun"),
+                parser.GetBoolOption("--help")
             ));
     }
 }
