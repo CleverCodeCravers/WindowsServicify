@@ -2,7 +2,7 @@
   "profiles": {
     "WindowsServicify.ConsoleApp": {
       "commandName": "Project",
-      "commandLineArgs": "--help"
+      "commandLineArgs": "--install"
     }
   }
 }
