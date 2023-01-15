@@ -17,7 +17,7 @@ if (runningInConsole)
 
     if (!commandLineParametersResult.IsSuccess)
     {
-        Console.WriteLine("Unfortunately there have been problems with the command line arguments.");
+        Console.WriteLine("Use --help to get help information.");
         return;
     }
 
@@ -28,12 +28,12 @@ if (runningInConsole)
         ICommandLineOption[] commands = parser.GetCommandsList();
         string[] commandsDescription =
         {
-                    "Prompts questions to configure the service",
-                    "Installs the windows service",
-                    "Removes the windows service",
-                    "Performs a test run for the service and outputs the result to the console",
-                    "Prints out the commands and their corresponding description",
-                };
+            "Prompts questions to configure the service",
+            "Installs the windows service",
+            "Removes the windows service",
+            "Performs a test run for the service and outputs the result to the console",
+            "Prints out the commands and their corresponding description",
+        };
 
         List<string> commandsWithDescription = new();
 
