@@ -40,7 +40,13 @@ public class ProcessManager
         process.StartInfo.FileName = _command;
         process.StartInfo.Arguments = _arguments;
         process.StartInfo.WorkingDirectory = _workingDirectory;
+        process.StartInfo.RedirectStandardOutput = true;
         process.Start();
+        while (!process.StandardOutput.EndOfStream)
+        {
+            string line = process.StandardOutput.ReadLine();
+            Logger.Log(line);
+        }
     }
     
     private void StopProcess()

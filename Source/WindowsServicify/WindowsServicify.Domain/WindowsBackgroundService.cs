@@ -21,12 +21,13 @@ public class WindowsBackgroundService : BackgroundService
         try
         {
             _processManager.Start();
-            
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 if (!_processManager.IsCorrectlyRunning())
                 {
                     _logger.LogWarning("Restarting Process...");
+                    Logger.Log("Restarting Process...");
                     _processManager.Start();
                 }
                 await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
@@ -36,6 +37,7 @@ public class WindowsBackgroundService : BackgroundService
         }
         catch (Exception ex)
         {
+            Logger.Log(ex.Message);
             _logger.LogError(ex, "{Message}", ex.Message);
 
             // Terminates this process and returns an exit code to the operating system.
@@ -54,6 +56,7 @@ public class WindowsBackgroundService : BackgroundService
     {
         _processManager.Stop();
         _logger.LogInformation("Stopping Background Service");
+        Logger.Log("Stopped Background Service");
     }
 
 }
