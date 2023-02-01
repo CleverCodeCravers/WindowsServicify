@@ -49,4 +49,11 @@ public class WindowsBackgroundService : BackgroundService
             Environment.Exit(1);
         }
     }
+    
+    public override async Task StopAsync(CancellationToken cancellationToken)
+    {
+        _processManager.Stop();
+        _logger.LogInformation("Stopping Background Service");
+    }
+
 }

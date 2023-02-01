@@ -7,11 +7,13 @@ The tool is a hybrid application. The usage is as follows:
 Lets say we have a powershell script that we want to run continuously in the background.
 
 After obtaining the exe file we copy it to a separate folder. There we run:
+
 ```powershell
 WindowsServicify.exe --configure
 ```
 
 Then the application will ask us several questions that we need to answer:
+
 ```
 Enter the service name you'd like: _
 Enter the display name you'd like: _
@@ -23,6 +25,7 @@ Working directory for the command: _
 These values will be written into a config.json file in the same folder the exe is in.
 
 After that we have the following commands available:
+
 ```powershell
 WindowsServicify.exe --install
 WindowsServicify.exe --uninstall
@@ -35,9 +38,22 @@ WindowsServicify.exe --testrun
 
 Everything else can be configured using the normal Windows mechanisms.
 
+## Example Config File
+
+```json
+{
+  "ServiceName": "TestService",
+  "DisplayName": "TestService1",
+  "Description": "",
+  "Command": "powershell.exe",
+  "WorkingDirectory": "Github\\Documentation",
+  "Arguments": "-File HelloWorld.ps1"
+}
+```
+
 ## Logging
 
-The application will automatically create log files. It will keep 7 days, older logs will automatically be deleted. Each log file is named by the date `yyyy-MM-dd.log`. 
+The application will automatically create log files. It will keep 7 days, older logs will automatically be deleted. Each log file is named by the date `yyyy-MM-dd.log`.
 The log files contain all the script output with date/timestamps in front of each line like so:
 
 ```
@@ -46,11 +62,9 @@ The log files contain all the script output with date/timestamps in front of eac
 
 ## About the execution
 
-The windows service will, when started, 
-- execute the named command line in the named working directory. 
+The windows service will, when started,
+
+- execute the named command line in the named working directory.
 - It will continously watch it.
 - When the process crashes or stops, it will log the crash and automatically restart the process.
 - All outputs of the process are written into the log files.
-
-
-
