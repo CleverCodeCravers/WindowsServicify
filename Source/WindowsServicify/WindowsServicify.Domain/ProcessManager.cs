@@ -6,9 +6,8 @@ public class ProcessManager
 {
     private readonly string _command;
     private readonly string _workingDirectory;
-    private Process process;
-    private bool shouldRun;
-    private string _arguments;
+    private Process? _process;
+    private readonly string _arguments;
 
     public ProcessManager(string command, string workingDirectory, string arguments)
     {
@@ -19,35 +18,36 @@ public class ProcessManager
 
     public void Start()
     {
-        shouldRun = true;
         StartProcess();
     }
 
     public void Stop()
     {
-        shouldRun = false;
         StopProcess();
     }
 
     public bool IsCorrectlyRunning()
     {
-        return !process.HasExited;
+        if (_process == null)
+            return false;
+        
+        return !_process.HasExited;
     }
     
     private void StartProcess()
     {
-        process = new Process();
-        process.StartInfo.FileName = _command;
-        process.StartInfo.Arguments = _arguments;
-        process.StartInfo.WorkingDirectory = _workingDirectory;
-        process.Start();
+        _process = new Process();
+        _process.StartInfo.FileName = _command;
+        _process.StartInfo.Arguments = _arguments;
+        _process.StartInfo.WorkingDirectory = _workingDirectory;
+        _process.Start();
     }
     
     private void StopProcess()
     {
-        if (process != null && !process.HasExited)
+        if (_process != null && !_process.HasExited)
         {
-            process.Kill();
+            _process.Kill();
         }
     }
 }

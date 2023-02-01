@@ -31,8 +31,6 @@ public class WindowsBackgroundService : BackgroundService
                 }
                 await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
             }
-
-            _processManager.Stop();
         }
         catch (Exception ex)
         {
@@ -50,10 +48,12 @@ public class WindowsBackgroundService : BackgroundService
         }
     }
     
-    public override async Task StopAsync(CancellationToken cancellationToken)
+    public override Task StopAsync(CancellationToken cancellationToken)
     {
         _processManager.Stop();
         _logger.LogInformation("Stopping Background Service");
+        
+        return Task.CompletedTask;
     }
 
 }
