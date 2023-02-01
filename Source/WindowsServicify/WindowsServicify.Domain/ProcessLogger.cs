@@ -10,8 +10,7 @@ public static class ProcessLogger
 
         string logMessage = "[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "] " + message;
         string logPath = Path.Combine(logFilePath, logFileName);
-        using StreamWriter logWriter = File.AppendText(logPath);
-        logWriter.WriteLine(logMessage);
+        File.AppendAllText(logPath, "\n" + logMessage);
     }
 
     public static void RemoveOldLogs(string logFilePath)
