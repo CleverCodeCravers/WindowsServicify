@@ -5,7 +5,7 @@ namespace WindowsServicify.Domain;
 public class ProcessManager
 {
     private readonly string _command;
-    private readonly string _workingDirectory;
+    public readonly string _workingDirectory;
     private Process process;
     private bool shouldRun;
     private string _arguments;
@@ -42,11 +42,14 @@ public class ProcessManager
         process.StartInfo.WorkingDirectory = _workingDirectory;
         process.StartInfo.RedirectStandardOutput = true;
         process.Start();
-        while (!process.StandardOutput.EndOfStream)
+        process.BeginOutputReadLine();
+        process.OutputDataReceived += (sender, args) =>
         {
-            string line = process.StandardOutput.ReadLine();
-            Logger.Log(line);
-        }
+            if (args.Data != null)
+            {
+                ProcessLogger.Log(args.Data, _workingDirectory);
+            }
+        };
     }
     
     private void StopProcess()
