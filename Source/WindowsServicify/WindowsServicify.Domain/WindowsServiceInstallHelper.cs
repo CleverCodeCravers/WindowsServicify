@@ -11,6 +11,12 @@ public static class WindowsServiceInstallHelper
         process.StartInfo.Arguments = $" create \"{serviceName}\" binpath=\"{filePath}\"";
         process.Start();
         process.WaitForExit();
+
+        if (process.ExitCode == 0)
+        {
+            Console.WriteLine("Thank you for installing your service.\r\nNow launch services.msc and configure your new service. You will probably need to adjust the start mode, maybe the user under which it will be executing...");
+        }
+
     }
 
     public static void RemoveService(string serviceName)
@@ -20,5 +26,10 @@ public static class WindowsServiceInstallHelper
         process.StartInfo.Arguments = $" delete \"{serviceName}\"";
         process.Start();
         process.WaitForExit();
+
+        if (process.ExitCode == 0)
+        {
+            Console.WriteLine("The Service has been removed successfully!");
+        } 
     }
 }
