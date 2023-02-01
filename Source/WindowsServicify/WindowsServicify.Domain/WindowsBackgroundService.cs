@@ -52,6 +52,7 @@ public class WindowsBackgroundService : BackgroundService
     
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
+        _processManager.Stop();
         _logger.LogInformation("Stopping Background Service");
     }
 
