@@ -7,13 +7,16 @@ public class WindowsBackgroundService : BackgroundService
 {
     private readonly ProcessManager _processManager;
     private readonly ILogger<WindowsBackgroundService> _logger;
+    private readonly ProcessLogger _processLogger;
 
     public WindowsBackgroundService(
         ProcessManager processManager,
-        ILogger<WindowsBackgroundService> logger) 
+        ILogger<WindowsBackgroundService> logger,
+        ProcessLogger processLogger) 
     {
         _processManager = processManager;
         _logger = logger;
+        _processLogger = processLogger;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -21,12 +24,13 @@ public class WindowsBackgroundService : BackgroundService
         try
         {
             _processManager.Start();
-            
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 if (!_processManager.IsCorrectlyRunning())
                 {
                     _logger.LogWarning("Restarting Process...");
+                    _processLogger.Log("Restarting Process...");
                     _processManager.Start();
                 }
                 await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
@@ -34,6 +38,7 @@ public class WindowsBackgroundService : BackgroundService
         }
         catch (Exception ex)
         {
+            _processLogger.Log(ex.Message);
             _logger.LogError(ex, "{Message}", ex.Message);
 
             // Terminates this process and returns an exit code to the operating system.
@@ -51,8 +56,7 @@ public class WindowsBackgroundService : BackgroundService
     public override Task StopAsync(CancellationToken cancellationToken)
     {
         _processManager.Stop();
-        _logger.LogInformation("Stopping Background Service");
-        
+        _processLogger.Log("Stopped Background Service");
         return Task.CompletedTask;
     }
 

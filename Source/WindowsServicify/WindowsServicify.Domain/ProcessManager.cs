@@ -8,12 +8,18 @@ public class ProcessManager
     private readonly string _workingDirectory;
     private Process? _process;
     private readonly string _arguments;
+    private readonly ProcessLogger _processLogger;
 
-    public ProcessManager(string command, string workingDirectory, string arguments)
+    public ProcessManager(
+        string command,
+        string workingDirectory,
+        string arguments,
+        ProcessLogger processLogger)
     {
         _command = command;
         _workingDirectory = workingDirectory;
         _arguments = arguments;
+        _processLogger = processLogger;
     }
 
     public void Start()
@@ -40,7 +46,16 @@ public class ProcessManager
         _process.StartInfo.FileName = _command;
         _process.StartInfo.Arguments = _arguments;
         _process.StartInfo.WorkingDirectory = _workingDirectory;
+        _process.StartInfo.RedirectStandardOutput = true;
         _process.Start();
+        _process.BeginOutputReadLine();
+        _process.OutputDataReceived += (sender, args) =>
+        {
+            if (args.Data != null)
+            {
+                _processLogger.Log(args.Data);
+            }
+        };
     }
     
     private void StopProcess()
