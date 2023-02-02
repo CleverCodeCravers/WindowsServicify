@@ -107,12 +107,14 @@ using IHost host = Host.CreateDefaultBuilder(args)
 #pragma warning disable CA1416
         LoggerProviderOptions.RegisterProviderOptions<EventLogSettings, EventLogLoggerProvider>(services);
 #pragma warning restore CA1416
-
+        var processLogger = new ProcessLogger(ExecutablePathHelper.GetExecutablePath());
+        services.AddSingleton(processLogger);
+        
         services.AddSingleton(new ProcessManager(
             configuration.Command,
             configuration.WorkingDirectory,
             configuration.Arguments,
-            new ProcessLogger(ExecutablePathHelper.GetExecutablePath())));
+            processLogger));
         services.AddHostedService<WindowsBackgroundService>();
     })
     .ConfigureLogging((context, logging) =>
