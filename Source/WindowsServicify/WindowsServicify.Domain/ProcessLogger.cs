@@ -1,21 +1,28 @@
 ﻿namespace WindowsServicify.Domain;
 
-public static class ProcessLogger
+public class ProcessLogger
 {
-    public static void Log(string message, string logFilePath)
+    private readonly string _logToDirectory;
+
+    public ProcessLogger(string logToDirectory)
+    {
+        _logToDirectory = logToDirectory;
+    }
+    
+    public void Log(string message)
     {
         string logFileName = DateTime.Now.ToString("yyyy-MM-dd") + ".log";
-        EnsureLogFileExists(logFilePath);
-        RemoveOldLogs(logFilePath);
+        EnsureLogFilePathExists();
+        RemoveOldLogs();
 
         string logMessage = "[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "] " + message;
-        string logPath = Path.Combine(logFilePath, logFileName);
+        string logPath = Path.Combine(_logToDirectory, logFileName);
         File.AppendAllText(logPath, "\n" + logMessage);
     }
 
-    public static void RemoveOldLogs(string logFilePath)
+    public void RemoveOldLogs()
     {
-        string[] logFiles = Directory.GetFiles(logFilePath, "*.log");
+        string[] logFiles = Directory.GetFiles(_logToDirectory, "*.log");
         foreach (string logFile in logFiles)
         {
             FileInfo fileInfo = new(logFile);
@@ -26,14 +33,11 @@ public static class ProcessLogger
         }
     }
 
-    public static void EnsureLogFileExists(string logFilePath)
+    public void EnsureLogFilePathExists()
     {
-
-        if (!Directory.Exists(logFilePath))
+        if (!Directory.Exists(_logToDirectory))
         {
-            Directory.CreateDirectory(logFilePath);
+            Directory.CreateDirectory(_logToDirectory);
         }
-
-        return;
     }
 }

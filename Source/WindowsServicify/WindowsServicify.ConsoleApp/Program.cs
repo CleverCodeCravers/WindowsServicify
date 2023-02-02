@@ -60,7 +60,8 @@ if (runningInConsole)
     if (parameters.Testrun)
     {
         var configData = ServiceConfigurationFileHandler.Load(configurationFilePath);
-        var processManager = new ProcessManager(configData.Command, configData.WorkingDirectory, configData.Arguments);
+        var processManager = new ProcessManager(configData.Command, configData.WorkingDirectory, configData.Arguments, 
+            new ProcessLogger(ExecutablePathHelper.GetExecutablePath()));
         Console.WriteLine("Process starting...");
         processManager.Start();
         while (!Console.KeyAvailable)
@@ -81,7 +82,7 @@ if (runningInConsole)
     {
         var configData = ServiceConfigurationFileHandler.Load(configurationFilePath);
         WindowsServiceInstallHelper.InstallService(configData.ServiceName, 
-            ExecutablePathHelper.GetExecutableFilePath()
+            ExecutablePathHelper.GetExecutableFilePath()!
             );
     }
 
@@ -103,9 +104,15 @@ using IHost host = Host.CreateDefaultBuilder(args)
     })
     .ConfigureServices(services =>
     {
+#pragma warning disable CA1416
         LoggerProviderOptions.RegisterProviderOptions<EventLogSettings, EventLogLoggerProvider>(services);
+#pragma warning restore CA1416
 
-        services.AddSingleton(new ProcessManager(configuration.Command, configuration.WorkingDirectory, configuration.Arguments));
+        services.AddSingleton(new ProcessManager(
+            configuration.Command,
+            configuration.WorkingDirectory,
+            configuration.Arguments,
+            new ProcessLogger(ExecutablePathHelper.GetExecutablePath())));
         services.AddHostedService<WindowsBackgroundService>();
     })
     .ConfigureLogging((context, logging) =>
