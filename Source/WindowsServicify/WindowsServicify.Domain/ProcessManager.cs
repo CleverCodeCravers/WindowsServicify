@@ -5,10 +5,9 @@ namespace WindowsServicify.Domain;
 public class ProcessManager
 {
     private readonly string _command;
-    public readonly string _workingDirectory;
-    private Process process;
-    private bool shouldRun;
-    private string _arguments;
+    private readonly string _workingDirectory;
+    private Process? _process;
+    private readonly string _arguments;
 
     public ProcessManager(string command, string workingDirectory, string arguments)
     {
@@ -19,19 +18,20 @@ public class ProcessManager
 
     public void Start()
     {
-        shouldRun = true;
         StartProcess();
     }
 
     public void Stop()
     {
-        shouldRun = false;
         StopProcess();
     }
 
     public bool IsCorrectlyRunning()
     {
-        return !process.HasExited;
+        if (_process == null)
+            return false;
+        
+        return !_process.HasExited;
     }
     
     private void StartProcess()
@@ -54,9 +54,9 @@ public class ProcessManager
     
     private void StopProcess()
     {
-        if (process != null && !process.HasExited)
+        if (_process != null && !_process.HasExited)
         {
-            process.Kill();
+            _process.Kill();
         }
     }
 }

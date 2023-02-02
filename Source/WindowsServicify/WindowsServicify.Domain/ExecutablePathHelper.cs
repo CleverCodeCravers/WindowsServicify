@@ -12,8 +12,8 @@ public class ExecutablePathHelper
         return exeDirectory;
     }
 
-    public static string GetExecutableFilePath()
+    public static string? GetExecutableFilePath()
     {
-        return Process.GetCurrentProcess().MainModule.FileName;
+        return Process.GetCurrentProcess()?.MainModule?.FileName;
     }
 }

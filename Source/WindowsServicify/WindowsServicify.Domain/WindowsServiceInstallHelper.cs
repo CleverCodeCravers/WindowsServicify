@@ -17,7 +17,8 @@ public static class WindowsServiceInstallHelper
         if (process.ExitCode == 0)
         {
             Console.WriteLine("Thank you for installing your service.\r\nNow launch services.msc and configure your new service. You will probably need to adjust the start mode, maybe the user under which it will be executing...");
-        } else
+        } 
+        else
         {
             Console.WriteLine(stdout);
         }
@@ -36,7 +37,8 @@ public static class WindowsServiceInstallHelper
         if (process.ExitCode == 0)
         {
             Console.WriteLine("The Service has been removed successfully!");
-        } else
+        } 
+        else
         {
             Console.WriteLine(stdout);
         }
