@@ -80,16 +80,12 @@ if (runningInConsole)
 
     if (parameters.Install)
     {
-        var configData = ServiceConfigurationFileHandler.Load(configurationFilePath);
-        WindowsServiceInstallHelper.InstallService(configData.ServiceName, 
-            ExecutablePathHelper.GetExecutableFilePath()!
-            );
+        InstallService(configurationFilePath, parameters.Legacy);
     }
 
     if (parameters.Uninstall)
     {
-        var configData = ServiceConfigurationFileHandler.Load(configurationFilePath);
-        WindowsServiceInstallHelper.RemoveService(configData.ServiceName);
+        RemoveService(configurationFilePath, parameters.Legacy);
     }
 
     return;
@@ -127,3 +123,18 @@ using IHost host = Host.CreateDefaultBuilder(args)
 
 await host.RunAsync();
 
+static void InstallService(string configurationFilePath, bool legacy)
+{
+    var installHelper = WindowsServiceInstallHelperFactory.Create(legacy);
+
+    var configData = ServiceConfigurationFileHandler.Load(configurationFilePath);
+    installHelper.InstallService(configData.ServiceName, configData.DisplayName, configData.Description, ExecutablePathHelper.GetExecutableFilePath()!);
+}
+
+static void RemoveService(string configurationFilePath, bool legacy)
+{
+    var installHelper = WindowsServiceInstallHelperFactory.Create(legacy);
+
+    var configData = ServiceConfigurationFileHandler.Load(configurationFilePath);
+    installHelper.RemoveService(configData.ServiceName);
+}

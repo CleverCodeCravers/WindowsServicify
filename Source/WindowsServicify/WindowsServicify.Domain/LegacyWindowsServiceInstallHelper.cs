@@ -2,9 +2,10 @@
 
 namespace WindowsServicify.Domain;
 
-public static class WindowsServiceInstallHelper
+
+public class LegacyWindowsServiceInstallHelper : IWindowsServiceInstallHelper
 {
-    public static void InstallService(string serviceName, string filePath)
+    public void InstallService(string serviceName, string displayName, string description, string filePath)
     {
         Process process = new();
         process.StartInfo.FileName = "sc.exe";
@@ -24,7 +25,7 @@ public static class WindowsServiceInstallHelper
         }
     }
 
-    public static void RemoveService(string serviceName)
+    public void RemoveService(string serviceName)
     {
         Process process = new();
         process.StartInfo.FileName = "sc.exe";

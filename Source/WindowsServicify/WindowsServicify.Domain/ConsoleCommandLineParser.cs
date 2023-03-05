@@ -17,8 +17,9 @@ public class ConsoleCommandLineParser
                 new BoolCommandLineOption("--install"),
                 new BoolCommandLineOption("--uninstall"),
                 new BoolCommandLineOption("--testrun"),
+                new BoolCommandLineOption("--legacy"),
                 new BoolCommandLineOption("--help")
-            });
+            }); ;
 
         return parser;
     }
@@ -37,6 +38,7 @@ public class ConsoleCommandLineParser
                 parser.GetBoolOption("--install"),
                 parser.GetBoolOption("--uninstall"),
                 parser.GetBoolOption("--testrun"),
+                parser.GetBoolOption("--legacy"),
                 parser.GetBoolOption("--help")
             ));
     }
