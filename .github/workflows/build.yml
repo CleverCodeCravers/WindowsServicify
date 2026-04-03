@@ -20,7 +20,7 @@ jobs:
             OUTPUTDIR: servicify-win-x64
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
