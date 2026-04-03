@@ -1,45 +1,67 @@
-﻿using CommandLineArgumentsParser;
-
 namespace WindowsServicify.Domain;
+
 public class ConsoleCommandLineParser
 {
-    public ICommandLineOption[] GetCommandsList()
+    private static readonly CommandDefinition[] Commands =
     {
-        var parser = this.ParseArgs();
-        return parser.GetCommandsList();
+        new("--configure", "Prompts questions to configure the service"),
+        new("--install", "Installs the windows service"),
+        new("--uninstall", "Removes the windows service"),
+        new("--testrun", "Performs a test run for the service and outputs the result to the console"),
+        new("--legacy", "Uses legacy sc.exe instead of PowerShell for service management"),
+        new("--help", "Prints out the commands and their corresponding description"),
+    };
+
+    public CommandDefinition[] GetCommandsList()
+    {
+        return Commands;
     }
 
-    private Parser ParseArgs()
-    {
-        var parser = new Parser(
-            new ICommandLineOption[] {
-                new BoolCommandLineOption("--configure"),
-                new BoolCommandLineOption("--install"),
-                new BoolCommandLineOption("--uninstall"),
-                new BoolCommandLineOption("--testrun"),
-                new BoolCommandLineOption("--legacy"),
-                new BoolCommandLineOption("--help")
-            }); ;
-
-        return parser;
-    }
     public Result<ConsoleCommandLineParameters> Parse(string[] args)
     {
-        var parser = this.ParseArgs();
-
-        if (!parser.TryParse(args, true) || args.Length == 0)
+        if (args.Length == 0)
         {
-            return Result<ConsoleCommandLineParameters>.Failure("Invalid command line arguments");
+            return Result<ConsoleCommandLineParameters>.Failure("No arguments provided.");
+        }
+
+        var configure = false;
+        var install = false;
+        var uninstall = false;
+        var testrun = false;
+        var legacy = false;
+        var help = false;
+
+        foreach (var arg in args)
+        {
+            switch (arg.ToLowerInvariant())
+            {
+                case "--configure":
+                    configure = true;
+                    break;
+                case "--install":
+                    install = true;
+                    break;
+                case "--uninstall":
+                    uninstall = true;
+                    break;
+                case "--testrun":
+                    testrun = true;
+                    break;
+                case "--legacy":
+                    legacy = true;
+                    break;
+                case "--help":
+                    help = true;
+                    break;
+                default:
+                    return Result<ConsoleCommandLineParameters>.Failure(
+                        $"Unknown argument: {arg}");
+            }
         }
 
         return Result<ConsoleCommandLineParameters>.Success(
-            new ConsoleCommandLineParameters(
-                parser.GetBoolOption("--configure"),
-                parser.GetBoolOption("--install"),
-                parser.GetBoolOption("--uninstall"),
-                parser.GetBoolOption("--testrun"),
-                parser.GetBoolOption("--legacy"),
-                parser.GetBoolOption("--help")
-            ));
+            new ConsoleCommandLineParameters(configure, install, uninstall, testrun, legacy, help));
     }
 }
+
+public record CommandDefinition(string Name, string Description);
