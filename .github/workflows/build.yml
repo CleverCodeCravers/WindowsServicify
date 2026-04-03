@@ -26,9 +26,6 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
           
-      - name: add internal nuget source
-        run: dotnet nuget add source --username CleverCodeCravers --password ${{ secrets.NUGET_PAT }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/CleverCodeCravers/index.json"
-
       - name: Install dependencies
         run: dotnet restore
         working-directory: Source/${{ env.SOLUTION_DIR }}
