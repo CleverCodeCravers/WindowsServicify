@@ -95,7 +95,8 @@ public class ProcessLogger : IDisposable
         _currentWriter?.Dispose();
 
         var logPath = Path.Combine(_logToDirectory, logFileName);
-        _currentWriter = new StreamWriter(logPath, append: true) { AutoFlush = true };
+        var fileStream = new FileStream(logPath, FileMode.Append, FileAccess.Write, FileShare.Read);
+        _currentWriter = new StreamWriter(fileStream) { AutoFlush = true };
         _currentLogFileName = logFileName;
     }
 }
