@@ -47,8 +47,8 @@ public class ProcessManager
         _process.StartInfo.Arguments = _arguments;
         _process.StartInfo.WorkingDirectory = _workingDirectory;
         _process.StartInfo.RedirectStandardOutput = true;
-        _process.Start();
-        _process.BeginOutputReadLine();
+        _process.StartInfo.RedirectStandardError = true;
+
         _process.OutputDataReceived += (sender, args) =>
         {
             if (args.Data != null)
@@ -56,6 +56,18 @@ public class ProcessManager
                 _processLogger.Log(args.Data);
             }
         };
+
+        _process.ErrorDataReceived += (sender, args) =>
+        {
+            if (args.Data != null)
+            {
+                _processLogger.Log("[ERROR] " + args.Data);
+            }
+        };
+
+        _process.Start();
+        _process.BeginOutputReadLine();
+        _process.BeginErrorReadLine();
     }
     
     private void StopProcess()
