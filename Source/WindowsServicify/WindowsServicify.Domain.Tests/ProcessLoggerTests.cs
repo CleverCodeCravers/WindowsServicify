@@ -326,4 +326,18 @@ public class ProcessLoggerTests
 
         Assert.That(File.Exists(txtFile), Is.True, "Non-.log files should not be deleted");
     }
+
+    [Test]
+    public void RemoveOldLogs_DoesNotThrowIfDirectoryDoesNotExist()
+    {
+        var nonExistentDir = Path.Combine(Path.GetTempPath(), "NonExistent_" + Guid.NewGuid().ToString("N"));
+        using var logger = new ProcessLogger(_testDirectory);
+
+        // Delete the directory that was created by the constructor to simulate non-existent directory
+        // We need to manipulate the logger's internal state, so instead we call RemoveOldLogs
+        // on a logger whose log directory was deleted after construction
+        Directory.Delete(_testDirectory, recursive: true);
+
+        Assert.DoesNotThrow(() => logger.RemoveOldLogs());
+    }
 }
