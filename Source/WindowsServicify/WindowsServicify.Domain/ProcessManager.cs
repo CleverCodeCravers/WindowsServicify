@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 
 namespace WindowsServicify.Domain;
 
@@ -9,17 +9,22 @@ public class ProcessManager
     private Process? _process;
     private readonly string _arguments;
     private readonly ProcessLogger _processLogger;
+    private readonly int _shutdownTimeoutMs;
+
+    public const int DefaultShutdownTimeoutMs = 10_000;
 
     public ProcessManager(
         string command,
         string workingDirectory,
         string arguments,
-        ProcessLogger processLogger)
+        ProcessLogger processLogger,
+        int shutdownTimeoutMs = DefaultShutdownTimeoutMs)
     {
         _command = command;
         _workingDirectory = workingDirectory;
         _arguments = arguments;
         _processLogger = processLogger;
+        _shutdownTimeoutMs = shutdownTimeoutMs;
     }
 
     public void Start()
@@ -36,10 +41,10 @@ public class ProcessManager
     {
         if (_process == null)
             return false;
-        
+
         return !_process.HasExited;
     }
-    
+
     private void StartProcess()
     {
         _process = new Process();
@@ -69,12 +74,23 @@ public class ProcessManager
         _process.BeginOutputReadLine();
         _process.BeginErrorReadLine();
     }
-    
+
     private void StopProcess()
     {
-        if (_process != null && !_process.HasExited)
+        if (_process == null || _process.HasExited)
+            return;
+
+        _processLogger.Log("Sending shutdown signal...");
+
+        _process.CloseMainWindow();
+
+        if (_process.WaitForExit(_shutdownTimeoutMs))
         {
-            _process.Kill();
+            _processLogger.Log("Process exited gracefully.");
+            return;
         }
+
+        _processLogger.Log("Force-killing after timeout");
+        _process.Kill(true);
     }
 }

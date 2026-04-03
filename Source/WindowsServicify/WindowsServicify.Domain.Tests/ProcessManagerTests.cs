@@ -216,7 +216,8 @@ public class ProcessManagerTests
             command: "cmd.exe",
             workingDirectory: Path.GetTempPath(),
             arguments: "/c ping 127.0.0.1 -n 30 > nul",
-            processLogger: _logger);
+            processLogger: _logger,
+            shutdownTimeoutMs: 1000);
 
         manager.Start();
         Thread.Sleep(500);
@@ -226,6 +227,148 @@ public class ProcessManagerTests
         Thread.Sleep(500);
 
         Assert.That(manager.IsCorrectlyRunning(), Is.False);
+    }
+
+    // --- Graceful Shutdown: Logging ---
+
+    [Test]
+    public void Stop_LogsShutdownSignalMessage()
+    {
+        var manager = new ProcessManager(
+            command: "cmd.exe",
+            workingDirectory: Path.GetTempPath(),
+            arguments: "/c ping 127.0.0.1 -n 30 > nul",
+            processLogger: _logger,
+            shutdownTimeoutMs: 1000);
+
+        manager.Start();
+        Thread.Sleep(500);
+
+        manager.Stop();
+        Thread.Sleep(500);
+
+        var logContent = GetLogContent();
+        Assert.That(logContent, Does.Contain("Sending shutdown signal..."));
+    }
+
+    [Test]
+    public void Stop_LogsForceKillMessageWhenProcessDoesNotExit()
+    {
+        // cmd.exe with ping does not respond to CloseMainWindow,
+        // so it will be force-killed after the timeout
+        var manager = new ProcessManager(
+            command: "cmd.exe",
+            workingDirectory: Path.GetTempPath(),
+            arguments: "/c ping 127.0.0.1 -n 30 > nul",
+            processLogger: _logger,
+            shutdownTimeoutMs: 1000);
+
+        manager.Start();
+        Thread.Sleep(500);
+
+        manager.Stop();
+        Thread.Sleep(500);
+
+        var logContent = GetLogContent();
+        Assert.That(logContent, Does.Contain("Force-killing after timeout"));
+    }
+
+    // --- Graceful Shutdown: Already exited process ---
+
+    [Test]
+    public void Stop_DoesNothingWhenProcessAlreadyExited()
+    {
+        var manager = new ProcessManager(
+            command: "cmd.exe",
+            workingDirectory: Path.GetTempPath(),
+            arguments: "/c echo done",
+            processLogger: _logger,
+            shutdownTimeoutMs: 1000);
+
+        manager.Start();
+        // Wait for the short-lived process to finish
+        Thread.Sleep(1500);
+        Assert.That(manager.IsCorrectlyRunning(), Is.False);
+
+        // Stop should not throw or log anything
+        manager.Stop();
+
+        var logContent = GetLogContent();
+        Assert.That(logContent, Does.Not.Contain("Sending shutdown signal..."));
+    }
+
+    [Test]
+    public void Stop_DoesNothingWhenNeverStarted()
+    {
+        var manager = new ProcessManager(
+            command: "cmd.exe",
+            workingDirectory: Path.GetTempPath(),
+            arguments: "/c echo test",
+            processLogger: _logger,
+            shutdownTimeoutMs: 1000);
+
+        // Stop without ever calling Start should not throw
+        Assert.DoesNotThrow(() => manager.Stop());
+    }
+
+    // --- Graceful Shutdown: Configurable timeout ---
+
+    [Test]
+    public void Stop_UsesConfiguredTimeout()
+    {
+        var shortTimeoutMs = 500;
+        var manager = new ProcessManager(
+            command: "cmd.exe",
+            workingDirectory: Path.GetTempPath(),
+            arguments: "/c ping 127.0.0.1 -n 60 > nul",
+            processLogger: _logger,
+            shutdownTimeoutMs: shortTimeoutMs);
+
+        manager.Start();
+        Thread.Sleep(500);
+
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        manager.Stop();
+        stopwatch.Stop();
+
+        // The stop should take approximately the configured timeout
+        // (not the default 10 seconds). Allow some tolerance.
+        Assert.That(stopwatch.ElapsedMilliseconds, Is.LessThan(5000),
+            "Stop should use the configured short timeout, not the default 10 seconds");
+        Assert.That(manager.IsCorrectlyRunning(), Is.False);
+    }
+
+    [Test]
+    public void DefaultShutdownTimeout_Is10Seconds()
+    {
+        Assert.That(ProcessManager.DefaultShutdownTimeoutMs, Is.EqualTo(10_000));
+    }
+
+    // --- Graceful Shutdown: Process that exits quickly ---
+
+    [Test]
+    public void Stop_LogsGracefulExitWhenProcessExitsDuringWait()
+    {
+        // Start a process that will exit on its own after a short time
+        // We use a very short-lived command, but start Stop while it might still be running
+        var manager = new ProcessManager(
+            command: "cmd.exe",
+            workingDirectory: Path.GetTempPath(),
+            arguments: "/c ping 127.0.0.1 -n 2 > nul",
+            processLogger: _logger,
+            shutdownTimeoutMs: 5000);
+
+        manager.Start();
+        Thread.Sleep(200);
+
+        // The ping -n 2 command takes ~1 second. With a 5 second timeout,
+        // the process should exit during the WaitForExit period.
+        manager.Stop();
+
+        var logContent = GetLogContent();
+        Assert.That(logContent, Does.Contain("Sending shutdown signal..."));
+        Assert.That(logContent, Does.Contain("Process exited gracefully."));
+        Assert.That(logContent, Does.Not.Contain("Force-killing after timeout"));
     }
 
     // --- Mehrere Zeilen StdOut ---
