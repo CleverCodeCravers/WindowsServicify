@@ -6,17 +6,22 @@ namespace WindowsServicify.Domain.Tests;
 public class ProcessManagerTests
 {
     private string _logDirectory = null!;
+    private ProcessLogger _logger = null!;
 
     [SetUp]
     public void SetUp()
     {
         _logDirectory = Path.Combine(Path.GetTempPath(), "ProcessManagerTests_" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_logDirectory);
+        _logger = new ProcessLogger(_logDirectory);
     }
 
     [TearDown]
     public void TearDown()
     {
+        // Dispose the logger first to release file handles
+        _logger?.Dispose();
+
         // Allow processes to fully release file handles
         Thread.Sleep(200);
 
@@ -41,7 +46,10 @@ public class ProcessManagerTests
         if (logFiles.Length == 0)
             return string.Empty;
 
-        return File.ReadAllText(logFiles[0]);
+        // Use FileShare.ReadWrite because ProcessLogger keeps the file open with a StreamWriter
+        using var fs = new FileStream(logFiles[0], FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+        using var reader = new StreamReader(fs);
+        return reader.ReadToEnd();
     }
 
     private static void WaitForLogContent(Func<string> getContent, Func<string, bool> predicate, int timeoutMs = 5000)
@@ -61,12 +69,11 @@ public class ProcessManagerTests
     [Test]
     public void Start_CapturesStdOutFromProcess()
     {
-        var logger = new ProcessLogger(_logDirectory);
         var manager = new ProcessManager(
             command: "cmd.exe",
             workingDirectory: _logDirectory,
             arguments: "/c echo HelloFromStdOut",
-            processLogger: logger);
+            processLogger: _logger);
 
         manager.Start();
 
@@ -81,12 +88,11 @@ public class ProcessManagerTests
     [Test]
     public void Start_CapturesStdErrWithErrorPrefix()
     {
-        var logger = new ProcessLogger(_logDirectory);
         var manager = new ProcessManager(
             command: "cmd.exe",
             workingDirectory: _logDirectory,
             arguments: "/c echo HelloFromStdErr 1>&2",
-            processLogger: logger);
+            processLogger: _logger);
 
         manager.Start();
 
@@ -104,12 +110,11 @@ public class ProcessManagerTests
     [Test]
     public void Start_CapturesFirstLineOfOutput()
     {
-        var logger = new ProcessLogger(_logDirectory);
         var manager = new ProcessManager(
             command: "cmd.exe",
             workingDirectory: _logDirectory,
             arguments: "/c echo VeryFirstLine",
-            processLogger: logger);
+            processLogger: _logger);
 
         manager.Start();
 
@@ -124,13 +129,12 @@ public class ProcessManagerTests
     [Test]
     public void Start_CapturesBothStdOutAndStdErr()
     {
-        var logger = new ProcessLogger(_logDirectory);
         // cmd /c with parentheses to output to both streams
         var manager = new ProcessManager(
             command: "cmd.exe",
             workingDirectory: _logDirectory,
             arguments: "/c \"echo StdOutLine & echo StdErrLine 1>&2\"",
-            processLogger: logger);
+            processLogger: _logger);
 
         manager.Start();
 
@@ -148,12 +152,11 @@ public class ProcessManagerTests
     [Test]
     public void Start_StdOutDoesNotHaveErrorPrefix()
     {
-        var logger = new ProcessLogger(_logDirectory);
         var manager = new ProcessManager(
             command: "cmd.exe",
             workingDirectory: _logDirectory,
             arguments: "/c echo OnlyStdOutHere",
-            processLogger: logger);
+            processLogger: _logger);
 
         manager.Start();
 
@@ -170,12 +173,11 @@ public class ProcessManagerTests
     [Test]
     public void IsCorrectlyRunning_BeforeStart_ReturnsFalse()
     {
-        var logger = new ProcessLogger(_logDirectory);
         var manager = new ProcessManager(
             command: "cmd.exe",
             workingDirectory: _logDirectory,
             arguments: "/c echo test",
-            processLogger: logger);
+            processLogger: _logger);
 
         Assert.That(manager.IsCorrectlyRunning(), Is.False);
     }
@@ -183,13 +185,12 @@ public class ProcessManagerTests
     [Test]
     public void IsCorrectlyRunning_WhileRunning_ReturnsTrue()
     {
-        var logger = new ProcessLogger(_logDirectory);
         // Use system temp as working directory to avoid locking _logDirectory
         var manager = new ProcessManager(
             command: "cmd.exe",
             workingDirectory: Path.GetTempPath(),
             arguments: "/c ping 127.0.0.1 -n 10 > nul",
-            processLogger: logger);
+            processLogger: _logger);
 
         manager.Start();
         Thread.Sleep(500);
@@ -210,13 +211,12 @@ public class ProcessManagerTests
     [Test]
     public void Stop_TerminatesRunningProcess()
     {
-        var logger = new ProcessLogger(_logDirectory);
         // Use system temp as working directory to avoid locking _logDirectory
         var manager = new ProcessManager(
             command: "cmd.exe",
             workingDirectory: Path.GetTempPath(),
             arguments: "/c ping 127.0.0.1 -n 30 > nul",
-            processLogger: logger);
+            processLogger: _logger);
 
         manager.Start();
         Thread.Sleep(500);
@@ -233,12 +233,11 @@ public class ProcessManagerTests
     [Test]
     public void Start_CapturesMultipleStdOutLines()
     {
-        var logger = new ProcessLogger(_logDirectory);
         var manager = new ProcessManager(
             command: "cmd.exe",
             workingDirectory: _logDirectory,
             arguments: "/c \"echo Line1 & echo Line2 & echo Line3\"",
-            processLogger: logger);
+            processLogger: _logger);
 
         manager.Start();
 

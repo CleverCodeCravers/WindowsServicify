@@ -1,36 +1,68 @@
-﻿namespace WindowsServicify.Domain;
+namespace WindowsServicify.Domain;
 
-public class ProcessLogger
+public class ProcessLogger : IDisposable
 {
     private readonly string _logToDirectory;
-    private readonly object _writeLock = new();
+    private readonly object _lock = new();
+    private DateTime _lastCleanup = DateTime.MinValue;
+    private StreamWriter? _currentWriter;
+    private string? _currentLogFileName;
+    private bool _disposed;
 
     public ProcessLogger(string logToDirectory)
     {
         _logToDirectory = logToDirectory;
+        EnsureLogFilePathExists();
     }
 
     public void Log(string message)
     {
-        string logFileName = DateTime.Now.ToString("yyyy-MM-dd") + ".log";
-        EnsureLogFilePathExists();
-        RemoveOldLogs();
-
-        string logMessage = "[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "] " + message;
-        string logPath = Path.Combine(_logToDirectory, logFileName);
-
-        lock (_writeLock)
+        lock (_lock)
         {
-            File.AppendAllText(logPath, "\n" + logMessage);
+            ObjectDisposedException.ThrowIf(_disposed, this);
+
+            CleanupIfNeeded();
+
+            var logFileName = DateTime.Now.ToString("yyyy-MM-dd") + ".log";
+            EnsureCorrectWriter(logFileName);
+
+            var logMessage = "[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "] " + message;
+            _currentWriter!.Write("\n" + logMessage);
         }
     }
 
-    public void RemoveOldLogs()
+    public void Dispose()
     {
-        string[] logFiles = Directory.GetFiles(_logToDirectory, "*.log");
-        foreach (string logFile in logFiles)
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed)
+            return;
+
+        if (disposing)
         {
-            FileInfo fileInfo = new(logFile);
+            lock (_lock)
+            {
+                _currentWriter?.Dispose();
+                _currentWriter = null;
+                _currentLogFileName = null;
+                _disposed = true;
+            }
+        }
+    }
+
+    internal void RemoveOldLogs()
+    {
+        if (!Directory.Exists(_logToDirectory))
+            return;
+
+        var logFiles = Directory.GetFiles(_logToDirectory, "*.log");
+        foreach (var logFile in logFiles)
+        {
+            var fileInfo = new FileInfo(logFile);
             if (fileInfo.CreationTime < DateTime.Now.AddDays(-7))
             {
                 fileInfo.Delete();
@@ -38,11 +70,33 @@ public class ProcessLogger
         }
     }
 
-    public void EnsureLogFilePathExists()
+    internal void EnsureLogFilePathExists()
     {
         if (!Directory.Exists(_logToDirectory))
         {
             Directory.CreateDirectory(_logToDirectory);
         }
+    }
+
+    private void CleanupIfNeeded()
+    {
+        if ((DateTime.Now - _lastCleanup).TotalHours >= 24)
+        {
+            RemoveOldLogs();
+            _lastCleanup = DateTime.Now;
+        }
+    }
+
+    private void EnsureCorrectWriter(string logFileName)
+    {
+        if (_currentLogFileName == logFileName && _currentWriter != null)
+            return;
+
+        _currentWriter?.Dispose();
+
+        var logPath = Path.Combine(_logToDirectory, logFileName);
+        var fileStream = new FileStream(logPath, FileMode.Append, FileAccess.Write, FileShare.Read);
+        _currentWriter = new StreamWriter(fileStream) { AutoFlush = true };
+        _currentLogFileName = logFileName;
     }
 }

@@ -48,8 +48,9 @@ if (runningInConsole)
     if (parameters.Testrun)
     {
         var configData = ServiceConfigurationFileHandler.Load(configurationFilePath);
-        var processManager = new ProcessManager(configData.Command, configData.WorkingDirectory, configData.Arguments, 
-            new ProcessLogger(ExecutablePathHelper.GetExecutablePath()));
+        using var processLogger = new ProcessLogger(ExecutablePathHelper.GetExecutablePath());
+        var processManager = new ProcessManager(configData.Command, configData.WorkingDirectory, configData.Arguments,
+            processLogger);
         Console.WriteLine("Process starting...");
         processManager.Start();
         while (!Console.KeyAvailable)
