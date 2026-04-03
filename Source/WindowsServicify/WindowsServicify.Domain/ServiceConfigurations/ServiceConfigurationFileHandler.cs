@@ -7,7 +7,11 @@ public class ServiceConfigurationFileHandler
     public static ServiceConfiguration Load(string filePath)
     {
         var configFile = File.ReadAllText(filePath);
-        return JsonSerializer.Deserialize<ServiceConfiguration>(configFile)!;
+        var configuration = JsonSerializer.Deserialize<ServiceConfiguration>(configFile)!;
+
+        ServiceConfigurationValidator.Validate(configuration);
+
+        return configuration;
     }
 
     public static void Save(string filePath, ServiceConfiguration serviceConfiguration)
