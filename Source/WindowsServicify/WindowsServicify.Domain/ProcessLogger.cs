@@ -3,12 +3,13 @@
 public class ProcessLogger
 {
     private readonly string _logToDirectory;
+    private readonly object _writeLock = new();
 
     public ProcessLogger(string logToDirectory)
     {
         _logToDirectory = logToDirectory;
     }
-    
+
     public void Log(string message)
     {
         string logFileName = DateTime.Now.ToString("yyyy-MM-dd") + ".log";
@@ -17,7 +18,11 @@ public class ProcessLogger
 
         string logMessage = "[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "] " + message;
         string logPath = Path.Combine(_logToDirectory, logFileName);
-        File.AppendAllText(logPath, "\n" + logMessage);
+
+        lock (_writeLock)
+        {
+            File.AppendAllText(logPath, "\n" + logMessage);
+        }
     }
 
     public void RemoveOldLogs()
