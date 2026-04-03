@@ -68,7 +68,7 @@ public static partial class ServiceConfigurationValidator
 
     private static bool ContainsPathTraversal(string value)
     {
-        return value.Contains("..") ;
+        return value.Contains("..");
     }
 
     [GeneratedRegex(@"^[a-zA-Z0-9_\-\. ]+$")]
