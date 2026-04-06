@@ -2,7 +2,7 @@
 
 ## Ueberblick
 
-**WindowsServicify** ist ein .NET 8.0 CLI-Tool, das beliebige Skripte und Executables als Windows-Service wrappen kann. Es konfiguriert, installiert und ueberwacht Prozesse als Windows-Dienste mit automatischem Restart und Logging.
+**WindowsServicify** ist ein .NET 10.0 CLI-Tool, das beliebige Skripte und Executables als Windows-Service wrappen kann. Es konfiguriert, installiert und ueberwacht Prozesse als Windows-Dienste mit automatischem Restart und Logging.
 
 > **Windows-only** -- Dieses Projekt laeuft ausschliesslich unter Windows. Es nutzt Windows-spezifische APIs (`Microsoft.Extensions.Hosting.WindowsServices`) und Windows-Service-Mechanismen (sc.exe / PowerShell `New-Service`). Cross-Platform-Kompatibilitaet ist nicht vorgesehen.
 
@@ -46,7 +46,7 @@ Source/WindowsServicify/
 
 ## Konventionen
 
-- **Target Framework**: .NET 8.0 (LTS)
+- **Target Framework**: .NET 10.0 (LTS)
 - **Nullable Reference Types**: Aktiviert (`<Nullable>enable</Nullable>`) in allen Projekten
 - **Record-Types fuer DTOs**: Immutable Datenklassen werden als `record` definiert (z.B. `ServiceConfiguration`, `ConsoleCommandLineParameters`, `CommandDefinition`)
 - **Result-Pattern**: Fehlerbehaftete Operationen geben `Result<T>` zurueck statt Exceptions zu werfen
