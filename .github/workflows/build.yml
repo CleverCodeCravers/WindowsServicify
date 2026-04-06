@@ -110,7 +110,7 @@ jobs:
         working-directory: Source/${{ env.SOLUTION_DIR }}
 
       - name: Test
-        run: dotnet test --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --settings WindowsServicify.Domain.Tests/coverlet.runsettings
+        run: dotnet test --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --settings coverlet.runsettings
         working-directory: Source/${{ env.SOLUTION_DIR }}
 
       - name: Upload coverage report
