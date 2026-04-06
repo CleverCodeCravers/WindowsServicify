@@ -2,7 +2,7 @@
 id: R00026
 titel: "Integration-Test-Projekt anlegen"
 typ: Verbesserung
-status: Offen
+status: Abgeschlossen
 prioritaet: Mittel
 aufwand: Mittel
 erstellt: 2026-04-06
@@ -24,13 +24,13 @@ quelle: R00022-Wartung-2026-04-06 (Vorschlag 6)
 
 ## Akzeptanzkriterien
 
-- [ ] Neues Projekt `WindowsServicify.Domain.IntegrationTests` in Solution
-- [ ] NUnit 4.x als Test-Framework (konsistent mit Unit-Tests)
-- [ ] Mindestens ein Test fuer den configure/testrun-Flow (E2E-artig: config schreiben → Prozess starten → Output pruefen → stoppen)
-- [ ] Mindestens ein Test fuer WindowsBackgroundService Lifecycle (Start → Running → Stop)
-- [ ] Tests nutzen temporaere Verzeichnisse mit Cleanup
-- [ ] Coverage-Messung ueber Solution (Unit + Integration gemeinsam)
-- [ ] CI-Workflow fuehrt auch Integration-Tests aus
+- [x] Neues Projekt `WindowsServicify.Domain.IntegrationTests` in Solution
+- [x] NUnit 4.x als Test-Framework (konsistent mit Unit-Tests)
+- [x] Mindestens ein Test fuer den configure/testrun-Flow (E2E-artig: config schreiben → Prozess starten → Output pruefen → stoppen)
+- [x] Mindestens ein Test fuer WindowsBackgroundService Lifecycle (Start → Running → Stop)
+- [x] Tests nutzen temporaere Verzeichnisse mit Cleanup
+- [x] Coverage-Messung ueber Solution (Unit + Integration gemeinsam)
+- [x] CI-Workflow fuehrt auch Integration-Tests aus
 
 ## Umsetzung
 
