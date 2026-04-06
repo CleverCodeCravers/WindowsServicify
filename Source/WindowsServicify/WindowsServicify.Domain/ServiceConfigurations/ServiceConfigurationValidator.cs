@@ -20,6 +20,7 @@ public static partial class ServiceConfigurationValidator
         ValidateCommand(errors, nameof(configuration.Command), configuration.Command);
         ValidateWorkingDirectory(errors, nameof(configuration.WorkingDirectory), configuration.WorkingDirectory);
         ValidateArguments(errors, nameof(configuration.Arguments), configuration.Arguments);
+        ValidateHealthCheckPort(errors, nameof(configuration.HealthCheckPort), configuration.HealthCheckPort);
 
         if (errors.Count > 0)
         {
@@ -107,6 +108,19 @@ public static partial class ServiceConfigurationValidator
     private static bool ContainsPathTraversal(string value)
     {
         return value.Contains("..");
+    }
+
+    private static void ValidateHealthCheckPort(List<string> errors, string fieldName, int? value)
+    {
+        if (value is null)
+        {
+            return;
+        }
+
+        if (value < 1024 || value > 65535)
+        {
+            errors.Add($"{fieldName} must be between 1024 and 65535. Value: '{value}'");
+        }
     }
 
     private static bool ContainsInjectionPattern(string value)
