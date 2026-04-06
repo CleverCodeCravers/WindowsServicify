@@ -143,7 +143,7 @@ public class WorkflowValidationTests
     [Test]
     public void Workflow_SetsBuildTimeVersion()
     {
-        Assert.That(_workflowContent, Does.Contain("/p:Version="));
+        Assert.That(_workflowContent, Does.Contain("-p:Version="));
     }
 
     [Test]

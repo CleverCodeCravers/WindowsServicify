@@ -106,7 +106,7 @@ jobs:
           fi
 
       - name: Build
-        run: dotnet build --configuration Release --no-restore /p:Version=${{ steps.version.outputs.version }}
+        run: dotnet build --configuration Release --no-restore -p:Version=${{ steps.version.outputs.version }}
         working-directory: Source/${{ env.SOLUTION_DIR }}
 
       - name: Test
@@ -122,7 +122,7 @@ jobs:
 
       - name: Publish
         if: steps.version.outputs.is_release == 'true'
-        run: dotnet publish ${{ env.PROJECT }} -c Release -o ${{ env.OUTPUTDIR }} -p:PublishReadyToRun=true --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:UseAppHost=true -r ${{ env.RUNTIMEID }} /p:Version=${{ steps.version.outputs.version }}
+        run: dotnet publish ${{ env.PROJECT }} -c Release -o ${{ env.OUTPUTDIR }} -p:PublishReadyToRun=true --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:UseAppHost=true -r ${{ env.RUNTIMEID }} -p:Version=${{ steps.version.outputs.version }}
         working-directory: Source/${{ env.SOLUTION_DIR }}
 
       - name: Delete PDB files
