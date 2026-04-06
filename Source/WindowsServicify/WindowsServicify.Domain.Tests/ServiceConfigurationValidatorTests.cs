@@ -552,4 +552,102 @@ public class ServiceConfigurationValidatorTests
 
         Assert.That(result.IsSuccess, Is.True);
     }
+
+    // --- HealthCheckPort validation ---
+
+    [Test]
+    public void Validate_WithNullHealthCheckPort_ReturnsSuccess()
+    {
+        var config = CreateValid() with { HealthCheckPort = null };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.True);
+    }
+
+    [Test]
+    public void Validate_WithValidHealthCheckPort_ReturnsSuccess()
+    {
+        var config = CreateValid() with { HealthCheckPort = 8080 };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.True);
+    }
+
+    [Test]
+    public void Validate_WithHealthCheckPortAtLowerBound_ReturnsSuccess()
+    {
+        var config = CreateValid() with { HealthCheckPort = 1024 };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.True);
+    }
+
+    [Test]
+    public void Validate_WithHealthCheckPortAtUpperBound_ReturnsSuccess()
+    {
+        var config = CreateValid() with { HealthCheckPort = 65535 };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.True);
+    }
+
+    [Test]
+    public void Validate_WithHealthCheckPortBelowLowerBound_ReturnsFailure()
+    {
+        var config = CreateValid() with { HealthCheckPort = 1023 };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorMessage, Does.Contain("HealthCheckPort"));
+        Assert.That(result.ErrorMessage, Does.Contain("1024"));
+    }
+
+    [Test]
+    public void Validate_WithHealthCheckPortAboveUpperBound_ReturnsFailure()
+    {
+        var config = CreateValid() with { HealthCheckPort = 65536 };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorMessage, Does.Contain("HealthCheckPort"));
+    }
+
+    [Test]
+    public void Validate_WithHealthCheckPortZero_ReturnsFailure()
+    {
+        var config = CreateValid() with { HealthCheckPort = 0 };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorMessage, Does.Contain("HealthCheckPort"));
+    }
+
+    [Test]
+    public void Validate_WithHealthCheckPortNegative_ReturnsFailure()
+    {
+        var config = CreateValid() with { HealthCheckPort = -1 };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorMessage, Does.Contain("HealthCheckPort"));
+    }
+
+    [Test]
+    public void Validate_WithHealthCheckPort80_ReturnsFailure()
+    {
+        var config = CreateValid() with { HealthCheckPort = 80 };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorMessage, Does.Contain("HealthCheckPort"));
+    }
 }
