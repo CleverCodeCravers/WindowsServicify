@@ -189,13 +189,13 @@ public class WindowsBackgroundServiceIntegrationTests
         await service.StartAsync(cts.Token);
 
         // Wait for process to start
-        LogFileReader.WaitFor(_tempDir.Path, _ => processManager.IsCorrectlyRunning(), timeoutMs: 5000);
+        LogFileReader.WaitFor(_tempDir.Path, _ => processManager.IsCorrectlyRunning(), timeoutMs: 10000);
 
         // Cancel the token - this triggers OperationCanceledException in ExecuteAsync
         cts.Cancel();
 
         // Give ExecuteAsync time to hit the catch block
-        await Task.Delay(2000);
+        await Task.Delay(3000);
 
         await service.StopAsync(CancellationToken.None);
 

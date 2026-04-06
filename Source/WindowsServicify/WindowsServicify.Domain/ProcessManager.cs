@@ -42,7 +42,15 @@ public class ProcessManager
         if (_process == null)
             return false;
 
-        return !_process.HasExited;
+        try
+        {
+            return !_process.HasExited;
+        }
+        catch (InvalidOperationException)
+        {
+            // Process object exists but process was not yet started or has been disposed
+            return false;
+        }
     }
 
     private void StartProcess()
