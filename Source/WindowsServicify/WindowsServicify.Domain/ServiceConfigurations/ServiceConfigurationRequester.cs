@@ -2,7 +2,7 @@
 {
     public class ServiceConfigurationRequester
     {
-        
+
         public static ServiceConfiguration GetServiceConfiguration()
         {
             var serviceName = ConsoleInput.ReadInput("Enter the service name you'd like to setup: ", true);
@@ -14,6 +14,6 @@
 
             return new ServiceConfiguration(serviceName, displayName, description, command, directory, arguments);
         }
-        
+
     }
 }

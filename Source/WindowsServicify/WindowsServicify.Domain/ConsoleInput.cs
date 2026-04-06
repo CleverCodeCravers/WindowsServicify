@@ -19,7 +19,7 @@ public static class ConsoleInput
             if (!required)
                 break;
         }
-        
+
         return input;
     }
 }

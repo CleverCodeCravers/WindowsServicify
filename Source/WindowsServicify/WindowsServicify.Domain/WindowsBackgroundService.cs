@@ -12,7 +12,7 @@ public class WindowsBackgroundService : BackgroundService
     public WindowsBackgroundService(
         ProcessManager processManager,
         ILogger<WindowsBackgroundService> logger,
-        ProcessLogger processLogger) 
+        ProcessLogger processLogger)
     {
         _processManager = processManager;
         _logger = logger;
@@ -52,7 +52,7 @@ public class WindowsBackgroundService : BackgroundService
             Environment.Exit(1);
         }
     }
-    
+
     public override Task StopAsync(CancellationToken cancellationToken)
     {
         _processManager.Stop();

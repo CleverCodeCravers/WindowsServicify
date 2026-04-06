@@ -8,7 +8,7 @@ public class ExecutablePathHelper
     {
         var exeLocation = GetExecutableFilePath();
         var exeDirectory = Path.GetDirectoryName(exeLocation)!;
-        
+
         return exeDirectory;
     }
 

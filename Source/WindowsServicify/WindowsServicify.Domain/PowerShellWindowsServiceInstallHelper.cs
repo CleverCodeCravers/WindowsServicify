@@ -38,7 +38,7 @@ public class PowerShellWindowsServiceInstallHelper : IWindowsServiceInstallHelpe
     private static string EncodeCommand(string command)
     {
         byte[] plainTextBytes = System.Text.Encoding.Unicode.GetBytes(command);
-        string encodedText = Convert.ToBase64String(plainTextBytes); 
+        string encodedText = Convert.ToBase64String(plainTextBytes);
         return encodedText;
     }
 
