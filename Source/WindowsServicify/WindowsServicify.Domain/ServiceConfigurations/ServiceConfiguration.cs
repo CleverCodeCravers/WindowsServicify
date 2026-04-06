@@ -6,4 +6,5 @@ public record ServiceConfiguration(
     string Description,
     string Command,
     string WorkingDirectory,
-    string Arguments);
+    string Arguments,
+    int? HealthCheckPort = null);

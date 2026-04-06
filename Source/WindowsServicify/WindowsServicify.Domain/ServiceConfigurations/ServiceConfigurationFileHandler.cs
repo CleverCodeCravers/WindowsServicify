@@ -4,6 +4,17 @@ namespace WindowsServicify.Domain;
 
 public class ServiceConfigurationFileHandler
 {
+    private static readonly JsonSerializerOptions SerializerOptions = new()
+    {
+        WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
+    private static readonly JsonSerializerOptions DeserializerOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
     public static Result<ServiceConfiguration> Load(string filePath)
     {
         string configFile;
@@ -23,7 +34,7 @@ public class ServiceConfigurationFileHandler
         ServiceConfiguration? configuration;
         try
         {
-            configuration = JsonSerializer.Deserialize<ServiceConfiguration>(configFile);
+            configuration = JsonSerializer.Deserialize<ServiceConfiguration>(configFile, DeserializerOptions);
         }
         catch (JsonException ex)
         {
@@ -40,12 +51,7 @@ public class ServiceConfigurationFileHandler
 
     public static void Save(string filePath, ServiceConfiguration serviceConfiguration)
     {
-        var options = new JsonSerializerOptions
-        {
-            WriteIndented = true
-        };
-
-        var json = JsonSerializer.Serialize(serviceConfiguration, options);
+        var json = JsonSerializer.Serialize(serviceConfiguration, SerializerOptions);
         File.WriteAllText(filePath, json);
     }
 }
