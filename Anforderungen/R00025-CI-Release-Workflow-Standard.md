@@ -2,7 +2,7 @@
 id: R00025
 titel: "CI-Workflow auf Release-Standard modernisieren"
 typ: Verbesserung
-status: Offen
+status: Abgeschlossen
 prioritaet: Hoch
 aufwand: Mittel
 erstellt: 2026-04-06
