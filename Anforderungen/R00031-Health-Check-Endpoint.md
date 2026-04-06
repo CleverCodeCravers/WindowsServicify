@@ -2,7 +2,7 @@
 id: R00031
 titel: "Health-Check HTTP-Endpoint als Differenzierungsmerkmal"
 typ: Feature
-status: Offen
+status: Erledigt
 prioritaet: Hoch
 aufwand: Gross
 erstellt: 2026-04-06
