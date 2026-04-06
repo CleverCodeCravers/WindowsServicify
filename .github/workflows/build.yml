@@ -2,7 +2,7 @@ on:
   push:
 
 env:
-  DOTNET_VERSION: "8.0.x" # The .NET SDK version to use
+  DOTNET_VERSION: "10.0.x" # The .NET SDK version to use
   SOLUTION_DIR: "WindowsServicify"
   PROJECT: "./WindowsServicify.ConsoleApp/WindowsServicify.ConsoleApp.csproj"
   RELEASEPREFIX: "WindowsServicify"
