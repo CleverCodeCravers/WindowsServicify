@@ -398,4 +398,158 @@ public class ServiceConfigurationValidatorTests
 
         Assert.That(result.IsSuccess, Is.True);
     }
+
+    // --- WorkingDirectory validation ---
+
+    [Test]
+    public void Validate_WithEmptyWorkingDirectory_ReturnsSuccess()
+    {
+        var config = CreateValid() with { WorkingDirectory = "" };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.True);
+    }
+
+    [Test]
+    public void Validate_WithValidWorkingDirectory_ReturnsSuccess()
+    {
+        var config = CreateValid() with { WorkingDirectory = @"C:\Program Files\MyApp" };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.True);
+    }
+
+    [Test]
+    public void Validate_WithWorkingDirectoryContainingPathTraversal_ReturnsFailure()
+    {
+        var config = CreateValid() with { WorkingDirectory = @"C:\Users\..\..\..\Windows\System32" };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorMessage, Does.Contain("WorkingDirectory"));
+        Assert.That(result.ErrorMessage, Does.Contain("path traversal"));
+    }
+
+    [Test]
+    public void Validate_WithWorkingDirectoryContainingDollarParenthesis_ReturnsFailure()
+    {
+        var config = CreateValid() with { WorkingDirectory = @"C:\$(whoami)" };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorMessage, Does.Contain("WorkingDirectory"));
+    }
+
+    [Test]
+    public void Validate_WithWorkingDirectoryContainingBacktick_ReturnsFailure()
+    {
+        var config = CreateValid() with { WorkingDirectory = @"C:\`calc`" };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorMessage, Does.Contain("WorkingDirectory"));
+    }
+
+    [Test]
+    public void Validate_WithWorkingDirectoryContainingPipe_ReturnsFailure()
+    {
+        var config = CreateValid() with { WorkingDirectory = @"C:\folder|evil" };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorMessage, Does.Contain("WorkingDirectory"));
+    }
+
+    [Test]
+    public void Validate_WithWorkingDirectoryContainingSemicolon_ReturnsFailure()
+    {
+        var config = CreateValid() with { WorkingDirectory = @"C:\folder;evil" };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorMessage, Does.Contain("WorkingDirectory"));
+    }
+
+    // --- Arguments validation ---
+
+    [Test]
+    public void Validate_WithEmptyArguments_ReturnsSuccess()
+    {
+        var config = CreateValid() with { Arguments = "" };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.True);
+    }
+
+    [Test]
+    public void Validate_WithValidArguments_ReturnsSuccess()
+    {
+        var config = CreateValid() with { Arguments = "--port 8080 --config \"my config.json\"" };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.True);
+    }
+
+    [Test]
+    public void Validate_WithArgumentsContainingDollarParenthesis_ReturnsFailure()
+    {
+        var config = CreateValid() with { Arguments = "--file $(rm -rf /)" };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorMessage, Does.Contain("Arguments"));
+    }
+
+    [Test]
+    public void Validate_WithArgumentsContainingBacktick_ReturnsFailure()
+    {
+        var config = CreateValid() with { Arguments = "--cmd `whoami`" };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorMessage, Does.Contain("Arguments"));
+    }
+
+    [Test]
+    public void Validate_WithArgumentsContainingPipe_ReturnsFailure()
+    {
+        var config = CreateValid() with { Arguments = "--output | net user hacker pass /add" };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorMessage, Does.Contain("Arguments"));
+    }
+
+    [Test]
+    public void Validate_WithArgumentsContainingSemicolon_ReturnsFailure()
+    {
+        var config = CreateValid() with { Arguments = "--run; rm -rf /" };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorMessage, Does.Contain("Arguments"));
+    }
+
+    [Test]
+    public void Validate_WithArgumentsContainingHyphensEqualsSlashes_ReturnsSuccess()
+    {
+        var config = CreateValid() with { Arguments = "--key=value /flag -f C:\\path\\to\\file" };
+
+        var result = ServiceConfigurationValidator.Validate(config);
+
+        Assert.That(result.IsSuccess, Is.True);
+    }
 }

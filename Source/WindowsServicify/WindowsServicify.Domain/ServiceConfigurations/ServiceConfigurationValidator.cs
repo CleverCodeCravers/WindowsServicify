@@ -18,6 +18,8 @@ public static partial class ServiceConfigurationValidator
         ValidateRequiredSafeName(errors, nameof(configuration.DisplayName), configuration.DisplayName);
         ValidateOptionalSafeName(errors, nameof(configuration.Description), configuration.Description);
         ValidateCommand(errors, nameof(configuration.Command), configuration.Command);
+        ValidateWorkingDirectory(errors, nameof(configuration.WorkingDirectory), configuration.WorkingDirectory);
+        ValidateArguments(errors, nameof(configuration.Arguments), configuration.Arguments);
 
         if (errors.Count > 0)
         {
@@ -69,9 +71,50 @@ public static partial class ServiceConfigurationValidator
         }
     }
 
+    private static void ValidateWorkingDirectory(List<string> errors, string fieldName, string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            // WorkingDirectory is optional — empty is allowed
+            return;
+        }
+
+        if (ContainsPathTraversal(value))
+        {
+            errors.Add($"{fieldName} contains path traversal sequences ('..'), which are not allowed. Value: '{value}'");
+        }
+
+        if (ContainsInjectionPattern(value))
+        {
+            errors.Add($"{fieldName} contains potentially dangerous characters. Value: '{value}'");
+        }
+    }
+
+    private static void ValidateArguments(List<string> errors, string fieldName, string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            // Arguments is optional — empty is allowed
+            return;
+        }
+
+        if (ContainsInjectionPattern(value))
+        {
+            errors.Add($"{fieldName} contains potentially dangerous characters. Value: '{value}'");
+        }
+    }
+
     private static bool ContainsPathTraversal(string value)
     {
         return value.Contains("..");
+    }
+
+    private static bool ContainsInjectionPattern(string value)
+    {
+        return value.Contains("$(") ||
+               value.Contains('`') ||
+               value.Contains('|') ||
+               value.Contains(';');
     }
 
     [GeneratedRegex(@"^[a-zA-Z0-9_\-\. ]+$")]
