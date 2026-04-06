@@ -23,10 +23,11 @@ dotnet test Source/WindowsServicify/WindowsServicify.sln
 
 ```
 Source/WindowsServicify/
-  WindowsServicify.sln                  # Solution-Datei
-  WindowsServicify.ConsoleApp/          # Entry Point -- CLI-Host, Program.cs
-  WindowsServicify.Domain/              # Business Logic -- Services, Prozess-Management, Konfiguration
-  WindowsServicify.Domain.Tests/        # Unit-Tests (NUnit 4.x)
+  WindowsServicify.sln                        # Solution-Datei
+  WindowsServicify.ConsoleApp/                # Entry Point -- CLI-Host, Program.cs
+  WindowsServicify.Domain/                    # Business Logic -- Services, Prozess-Management, Konfiguration
+  WindowsServicify.Domain.Tests/              # Unit-Tests (NUnit 4.x)
+  WindowsServicify.Domain.IntegrationTests/   # Integration-Tests (NUnit 4.x)
 ```
 
 | Projekt | Rolle |
@@ -34,11 +35,12 @@ Source/WindowsServicify/
 | **ConsoleApp** | Entry Point und CLI-Host. Parst Kommandozeilen-Argumente, startet den Windows-Service-Host oder fuehrt Konfiguration/Installation aus. |
 | **Domain** | Gesamte Business Logic. Prozess-Management, Service-Konfiguration, Logging, Windows-Service-Installation. |
 | **Domain.Tests** | Unit-Tests fuer die Domain-Logik. Nutzt `InternalsVisibleTo` fuer Zugriff auf interne Klassen. |
+| **Domain.IntegrationTests** | Integration-Tests fuer Prozess-Lifecycle, BackgroundService und Configure/Testrun-Flow. Nutzt echte Prozesse und temporaere Verzeichnisse. |
 
 ### Wichtige Domain-Klassen
 
 - `ConsoleCommandLineParser` -- Parst CLI-Argumente (`--configure`, `--install`, `--uninstall`, `--testrun`, `--help`)
-- `WindowsBackgroundService` -- Der eigentliche Windows-Service, der den konfigurierten Prozess ueberwacht
+- `WindowsBackgroundService` -- Der eigentliche Windows-Service, der den konfigurierten Prozess ueberwacht. Nutzt `IProcessExitHandler` fuer testbaren Exit.
 - `ProcessManager` -- Startet und ueberwacht den Kindprozess, faengt stdout/stderr ab
 - `ProcessLogger` -- Schreibt Prozess-Ausgaben in tagesbasierte Log-Dateien (7 Tage Rotation)
 - `ServiceConfigurations/` -- Konfigurationsmodell, Validierung, Datei-I/O, interaktive Abfrage
