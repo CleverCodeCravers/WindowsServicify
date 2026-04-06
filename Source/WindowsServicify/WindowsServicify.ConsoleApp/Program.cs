@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
@@ -17,7 +17,7 @@ if (runningInConsole)
     if (!commandLineParametersResult.IsSuccess)
     {
         Console.WriteLine("Use --help to get help information.");
-        return;
+        return 1;
     }
 
     var parameters = commandLineParametersResult.Value;
@@ -34,15 +34,15 @@ if (runningInConsole)
                     $"\n\n [Usage]\n\n" +
                     $"\n{string.Join("\r\n", commandsWithDescription)}");
 
-        return;
+        return 0;
     }
 
     if (parameters.Configure)
     {
         Console.WriteLine("Please enter the necessary configuration data:");
         var configData = ServiceConfigurationRequester.GetServiceConfiguration();
-        ServiceConfigurationFileHandler.Save(configurationFilePath,configData);
-        return;
+        ServiceConfigurationFileHandler.Save(configurationFilePath, configData);
+        return 0;
     }
 
     if (parameters.Testrun)
@@ -51,7 +51,7 @@ if (runningInConsole)
         if (!configResult.IsSuccess)
         {
             Console.WriteLine(configResult.ErrorMessage);
-            return;
+            return 1;
         }
 
         var configData = configResult.Value;
@@ -72,19 +72,26 @@ if (runningInConsole)
         }
         Console.WriteLine("Good bye!");
         processManager.Stop();
+        return 0;
     }
 
     if (parameters.Install)
     {
-        InstallService(configurationFilePath, parameters.Legacy);
+        if (!InstallService(configurationFilePath, parameters.Legacy))
+        {
+            return 1;
+        }
     }
 
     if (parameters.Uninstall)
     {
-        RemoveService(configurationFilePath, parameters.Legacy);
+        if (!RemoveService(configurationFilePath, parameters.Legacy))
+        {
+            return 1;
+        }
     }
 
-    return;
+    return 0;
 }
 
 var configurationResult = ServiceConfigurationFileHandler.Load(configurationFilePath);
@@ -108,7 +115,7 @@ using IHost host = Host.CreateDefaultBuilder(args)
 #pragma warning restore CA1416
         var processLogger = new ProcessLogger(ExecutablePathHelper.GetExecutablePath());
         services.AddSingleton(processLogger);
-        
+
         services.AddSingleton(new ProcessManager(
             configuration.Command,
             configuration.WorkingDirectory,
@@ -125,6 +132,8 @@ using IHost host = Host.CreateDefaultBuilder(args)
     .Build();
 
 await host.RunAsync();
+
+return 0;
 
 static bool InstallService(string configurationFilePath, bool legacy)
 {
