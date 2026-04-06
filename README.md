@@ -1,10 +1,20 @@
 # Windows Servicify
 
-The tool is a hybrid application. The usage is as follows:
+![Build](https://github.com/CleverCodeCravers/WindowsServicify/actions/workflows/build.yml/badge.svg)
 
-## Setting up and starting a windows service
+A .NET CLI tool that wraps any script or executable as a Windows Service. It configures, installs, and monitors processes as Windows services with automatic restart and logging.
 
-Lets say we have a powershell script that we want to run continuously in the background.
+## Installation
+
+Download the latest release from [GitHub Releases](https://github.com/CleverCodeCravers/WindowsServicify/releases). Extract the ZIP file to a folder of your choice.
+
+**Requirements:** Windows 10/11 or Windows Server 2016+. No .NET runtime installation needed (self-contained executable).
+
+## Usage
+
+### Setting up and starting a Windows service
+
+Lets say we have a PowerShell script that we want to run continuously in the background.
 
 After obtaining the exe file we copy it to a separate folder. There we run:
 
@@ -32,13 +42,13 @@ WindowsServicify.exe --uninstall
 WindowsServicify.exe --testrun
 ```
 
-- `--install` will install the windows service (per default with local system as a user and as disabled, but you know you can change these settings in the service manager once the service is there...)
+- `--install` will install the Windows service (per default with local system as a user and as disabled, but you know you can change these settings in the service manager once the service is there...)
 - `--uninstall` will remove our service from the services
 - `--testrun` will start the application in console mode. Everything else is the same. This way you can have a look at all the outputs.
 
 Everything else can be configured using the normal Windows mechanisms.
 
-## Example Config File
+### Example Config File
 
 ```json
 {
@@ -46,7 +56,7 @@ Everything else can be configured using the normal Windows mechanisms.
   "DisplayName": "TestService1",
   "Description": "",
   "Command": "powershell.exe",
-  "WorkingDirectory": "Github\\Documentation",
+  "WorkingDirectory": "C:\\Scripts",
   "Arguments": "-File HelloWorld.ps1"
 }
 ```
@@ -62,9 +72,34 @@ The log files contain all the script output with date/timestamps in front of eac
 
 ## About the execution
 
-The windows service will, when started,
+The Windows service will, when started,
 
 - execute the named command line in the named working directory.
-- It will continously watch it.
+- It will continuously watch it.
 - When the process crashes or stops, it will log the crash and automatically restart the process.
 - All outputs of the process are written into the log files.
+
+## Alternatives
+
+- [WinSW](https://github.com/winsw/winsw) -- XML-based configuration, mature project
+- [Shawl](https://github.com/mtkennerly/shawl) -- Rust-based, minimal
+- [NSSM](https://nssm.cc/) -- GUI-based, long-established
+
+## Development
+
+**Prerequisites:** [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+
+```bash
+# Build
+dotnet build Source/WindowsServicify/WindowsServicify.sln
+
+# Run tests
+dotnet test Source/WindowsServicify/WindowsServicify.sln
+
+# Run tests with coverage
+dotnet test Source/WindowsServicify/WindowsServicify.sln --collect:"XPlat Code Coverage" --settings Source/WindowsServicify/WindowsServicify.Domain.Tests/coverlet.runsettings
+```
+
+## License
+
+[MIT](LICENSE)
