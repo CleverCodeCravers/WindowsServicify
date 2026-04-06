@@ -47,8 +47,15 @@ jobs:
         working-directory: Source/${{ env.SOLUTION_DIR }}
 
       - name: Test
-        run: dotnet test --configuration Release --no-build --verbosity normal
+        run: dotnet test --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --settings WindowsServicify.Domain.Tests/coverlet.runsettings
         working-directory: Source/${{ env.SOLUTION_DIR }}
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: Source/${{ env.SOLUTION_DIR }}/**/coverage.cobertura.xml
 
       - name: Publish
         run: dotnet publish ${{ env.PROJECT }} -c Release -o ${{matrix.OUTPUTDIR}} -p:PublishReadyToRun=true --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:UseAppHost=true -r ${{matrix.RUNTIMEID}}
