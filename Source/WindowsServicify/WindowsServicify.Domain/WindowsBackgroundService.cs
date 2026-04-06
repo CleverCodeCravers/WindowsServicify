@@ -8,15 +8,18 @@ public class WindowsBackgroundService : BackgroundService
     private readonly ProcessManager _processManager;
     private readonly ILogger<WindowsBackgroundService> _logger;
     private readonly ProcessLogger _processLogger;
+    private readonly IProcessExitHandler _applicationLifetime;
 
     public WindowsBackgroundService(
         ProcessManager processManager,
         ILogger<WindowsBackgroundService> logger,
-        ProcessLogger processLogger)
+        ProcessLogger processLogger,
+        IProcessExitHandler? applicationLifetime = null)
     {
         _processManager = processManager;
         _logger = logger;
         _processLogger = processLogger;
+        _applicationLifetime = applicationLifetime ?? new DefaultProcessExitHandler();
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -49,7 +52,7 @@ public class WindowsBackgroundService : BackgroundService
             //
             // In order for the Windows Service Management system to leverage configured
             // recovery options, we need to terminate the process with a non-zero exit code.
-            Environment.Exit(1);
+            _applicationLifetime.Exit(1);
         }
     }
 

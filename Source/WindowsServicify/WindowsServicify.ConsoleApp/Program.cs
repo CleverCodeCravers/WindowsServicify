@@ -122,6 +122,7 @@ using IHost host = Host.CreateDefaultBuilder(args)
             configuration.WorkingDirectory,
             configuration.Arguments,
             processLogger));
+        services.AddSingleton<IProcessExitHandler, DefaultProcessExitHandler>();
         services.AddHostedService<WindowsBackgroundService>();
     })
     .ConfigureLogging((context, logging) =>
