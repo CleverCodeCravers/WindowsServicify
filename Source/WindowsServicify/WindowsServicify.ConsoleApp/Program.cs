@@ -59,20 +59,41 @@ if (runningInConsole)
         using var processLogger = new ProcessLogger(ExecutablePathHelper.GetExecutablePath());
         var processManager = new ProcessManager(configData.Command, configData.WorkingDirectory, configData.Arguments,
             processLogger);
-        Console.WriteLine("Process starting...");
-        processManager.Start();
-        while (!Console.KeyAvailable)
+
+        HealthCheckService? healthCheckService = null;
+        if (configData.HealthCheckPort.HasValue)
         {
-            Console.Write(".");
-            if (!processManager.IsCorrectlyRunning())
-            {
-                Console.WriteLine("Restarting process...");
-                processManager.Start();
-            }
-            Thread.Sleep(1000);
+            healthCheckService = new HealthCheckService(configData.HealthCheckPort.Value, processManager);
         }
-        Console.WriteLine("Good bye!");
-        processManager.Stop();
+
+        try
+        {
+            Console.WriteLine("Process starting...");
+            processManager.Start();
+            healthCheckService?.Start();
+
+            if (healthCheckService != null)
+            {
+                Console.WriteLine($"Health check endpoint: http://localhost:{configData.HealthCheckPort}/health");
+            }
+
+            while (!Console.KeyAvailable)
+            {
+                Console.Write(".");
+                if (!processManager.IsCorrectlyRunning())
+                {
+                    Console.WriteLine("Restarting process...");
+                    processManager.Start();
+                }
+                Thread.Sleep(1000);
+            }
+            Console.WriteLine("Good bye!");
+        }
+        finally
+        {
+            healthCheckService?.Dispose();
+            processManager.Stop();
+        }
         return 0;
     }
 
@@ -117,11 +138,18 @@ using IHost host = Host.CreateDefaultBuilder(args)
         var processLogger = new ProcessLogger(ExecutablePathHelper.GetExecutablePath());
         services.AddSingleton(processLogger);
 
-        services.AddSingleton(new ProcessManager(
+        var processManager = new ProcessManager(
             configuration.Command,
             configuration.WorkingDirectory,
             configuration.Arguments,
-            processLogger));
+            processLogger);
+        services.AddSingleton(processManager);
+
+        if (configuration.HealthCheckPort.HasValue)
+        {
+            services.AddSingleton(new HealthCheckService(configuration.HealthCheckPort.Value, processManager));
+        }
+
         services.AddSingleton<IProcessExitHandler, DefaultProcessExitHandler>();
         services.AddHostedService<WindowsBackgroundService>();
     })

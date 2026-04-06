@@ -9,17 +9,20 @@ public class WindowsBackgroundService : BackgroundService
     private readonly ILogger<WindowsBackgroundService> _logger;
     private readonly ProcessLogger _processLogger;
     private readonly IProcessExitHandler _processExitHandler;
+    private readonly HealthCheckService? _healthCheckService;
 
     public WindowsBackgroundService(
         ProcessManager processManager,
         ILogger<WindowsBackgroundService> logger,
         ProcessLogger processLogger,
-        IProcessExitHandler? processExitHandler = null)
+        IProcessExitHandler? processExitHandler = null,
+        HealthCheckService? healthCheckService = null)
     {
         _processManager = processManager;
         _logger = logger;
         _processLogger = processLogger;
         _processExitHandler = processExitHandler ?? new DefaultProcessExitHandler();
+        _healthCheckService = healthCheckService;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -27,6 +30,7 @@ public class WindowsBackgroundService : BackgroundService
         try
         {
             _processManager.Start();
+            _healthCheckService?.Start();
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -58,6 +62,7 @@ public class WindowsBackgroundService : BackgroundService
 
     public override Task StopAsync(CancellationToken cancellationToken)
     {
+        _healthCheckService?.Stop();
         _processManager.Stop();
         _processLogger.Log("Stopped Background Service");
         return Task.CompletedTask;
