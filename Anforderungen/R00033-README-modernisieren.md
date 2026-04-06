@@ -2,7 +2,7 @@
 id: R00033
 titel: "README modernisieren"
 typ: Verbesserung
-status: Offen
+status: Abgeschlossen
 prioritaet: Niedrig
 aufwand: Klein
 erstellt: 2026-04-06

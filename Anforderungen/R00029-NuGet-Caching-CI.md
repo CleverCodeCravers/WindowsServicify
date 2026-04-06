@@ -2,7 +2,7 @@
 id: R00029
 titel: "NuGet-Caching im CI-Workflow"
 typ: Verbesserung
-status: Offen
+status: Abgeschlossen
 prioritaet: Mittel
 aufwand: Klein
 erstellt: 2026-04-06

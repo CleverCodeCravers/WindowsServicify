@@ -2,7 +2,7 @@
 id: R00024
 titel: "Arguments- und WorkingDirectory-Validierung ergaenzen"
 typ: Sicherheit
-status: Offen
+status: Abgeschlossen
 prioritaet: Hoch
 aufwand: Klein
 erstellt: 2026-04-06

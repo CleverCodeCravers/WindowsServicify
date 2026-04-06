@@ -2,7 +2,7 @@
 id: R00028
 titel: "Exit-Codes in Program.cs einfuehren"
 typ: Verbesserung
-status: Offen
+status: Abgeschlossen
 prioritaet: Mittel
 aufwand: Klein
 erstellt: 2026-04-06

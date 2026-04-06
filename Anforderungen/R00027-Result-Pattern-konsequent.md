@@ -2,7 +2,7 @@
 id: R00027
 titel: "Result-Pattern konsequent einsetzen"
 typ: Verbesserung
-status: Offen
+status: Abgeschlossen
 prioritaet: Mittel
 aufwand: Mittel
 erstellt: 2026-04-06

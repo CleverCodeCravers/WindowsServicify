@@ -2,7 +2,7 @@
 id: R00023
 titel: "TreatWarningsAsErrors aktivieren"
 typ: Verbesserung
-status: Offen
+status: Abgeschlossen
 prioritaet: Hoch
 aufwand: Klein
 erstellt: 2026-04-06
