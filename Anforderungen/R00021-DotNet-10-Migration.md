@@ -2,7 +2,7 @@
 id: R00021
 titel: "Migration von .NET 8.0 auf .NET 10.0"
 typ: Wartung
-status: Offen
+status: Abgeschlossen
 prioritaet: Hoch
 aufwand: Klein
 erstellt: 2026-04-06
