@@ -50,14 +50,15 @@ public class ServiceConfigurationFileHandlerTests
         var filePath = GetTempFilePath();
 
         ServiceConfigurationFileHandler.Save(filePath, original);
-        var loaded = ServiceConfigurationFileHandler.Load(filePath);
+        var result = ServiceConfigurationFileHandler.Load(filePath);
 
-        Assert.That(loaded.ServiceName, Is.EqualTo(original.ServiceName));
-        Assert.That(loaded.DisplayName, Is.EqualTo(original.DisplayName));
-        Assert.That(loaded.Description, Is.EqualTo(original.Description));
-        Assert.That(loaded.Command, Is.EqualTo(original.Command));
-        Assert.That(loaded.WorkingDirectory, Is.EqualTo(original.WorkingDirectory));
-        Assert.That(loaded.Arguments, Is.EqualTo(original.Arguments));
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.Value.ServiceName, Is.EqualTo(original.ServiceName));
+        Assert.That(result.Value.DisplayName, Is.EqualTo(original.DisplayName));
+        Assert.That(result.Value.Description, Is.EqualTo(original.Description));
+        Assert.That(result.Value.Command, Is.EqualTo(original.Command));
+        Assert.That(result.Value.WorkingDirectory, Is.EqualTo(original.WorkingDirectory));
+        Assert.That(result.Value.Arguments, Is.EqualTo(original.Arguments));
     }
 
     [Test]
@@ -67,9 +68,10 @@ public class ServiceConfigurationFileHandlerTests
         var filePath = GetTempFilePath();
 
         ServiceConfigurationFileHandler.Save(filePath, original);
-        var loaded = ServiceConfigurationFileHandler.Load(filePath);
+        var result = ServiceConfigurationFileHandler.Load(filePath);
 
-        Assert.That(loaded, Is.EqualTo(original));
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.Value, Is.EqualTo(original));
     }
 
     [Test]
@@ -86,11 +88,12 @@ public class ServiceConfigurationFileHandlerTests
         var filePath = GetTempFilePath();
 
         ServiceConfigurationFileHandler.Save(filePath, original);
-        var loaded = ServiceConfigurationFileHandler.Load(filePath);
+        var result = ServiceConfigurationFileHandler.Load(filePath);
 
-        Assert.That(loaded.Description, Is.EqualTo(""));
-        Assert.That(loaded.WorkingDirectory, Is.EqualTo(""));
-        Assert.That(loaded.Arguments, Is.EqualTo(""));
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.Value.Description, Is.EqualTo(""));
+        Assert.That(result.Value.WorkingDirectory, Is.EqualTo(""));
+        Assert.That(result.Value.Arguments, Is.EqualTo(""));
     }
 
     [Test]
@@ -103,9 +106,10 @@ public class ServiceConfigurationFileHandlerTests
         var filePath = GetTempFilePath();
 
         ServiceConfigurationFileHandler.Save(filePath, original);
-        var loaded = ServiceConfigurationFileHandler.Load(filePath);
+        var result = ServiceConfigurationFileHandler.Load(filePath);
 
-        Assert.That(loaded.Command, Is.EqualTo(original.Command));
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.Value.Command, Is.EqualTo(original.Command));
     }
 
     [Test]
@@ -118,9 +122,10 @@ public class ServiceConfigurationFileHandlerTests
         var filePath = GetTempFilePath();
 
         ServiceConfigurationFileHandler.Save(filePath, original);
-        var loaded = ServiceConfigurationFileHandler.Load(filePath);
+        var result = ServiceConfigurationFileHandler.Load(filePath);
 
-        Assert.That(loaded.Description, Is.EqualTo(original.Description));
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.Value.Description, Is.EqualTo(original.Description));
     }
 
     // --- Save tests ---
@@ -169,41 +174,50 @@ public class ServiceConfigurationFileHandlerTests
 
         ServiceConfigurationFileHandler.Save(filePath, first);
         ServiceConfigurationFileHandler.Save(filePath, second);
-        var loaded = ServiceConfigurationFileHandler.Load(filePath);
+        var result = ServiceConfigurationFileHandler.Load(filePath);
 
-        Assert.That(loaded.ServiceName, Is.EqualTo("UpdatedService"));
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.Value.ServiceName, Is.EqualTo("UpdatedService"));
     }
 
     // --- Load error cases ---
 
     [Test]
-    public void Load_WithNonExistentFile_ThrowsFileNotFoundException()
+    public void Load_WithNonExistentFile_ReturnsFailure()
     {
         var filePath = GetTempFilePath("nonexistent.json");
 
-        Assert.Throws<FileNotFoundException>(() => ServiceConfigurationFileHandler.Load(filePath));
+        var result = ServiceConfigurationFileHandler.Load(filePath);
+
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorMessage, Does.Contain("not found"));
     }
 
     [Test]
-    public void Load_WithInvalidJson_ThrowsJsonException()
+    public void Load_WithInvalidJson_ReturnsFailure()
     {
         var filePath = GetTempFilePath();
         File.WriteAllText(filePath, "{ this is not valid json }");
 
-        Assert.Throws<JsonException>(() => ServiceConfigurationFileHandler.Load(filePath));
+        var result = ServiceConfigurationFileHandler.Load(filePath);
+
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorMessage, Does.Contain("invalid JSON"));
     }
 
     [Test]
-    public void Load_WithEmptyFile_ThrowsJsonException()
+    public void Load_WithEmptyFile_ReturnsFailure()
     {
         var filePath = GetTempFilePath();
         File.WriteAllText(filePath, "");
 
-        Assert.Throws<JsonException>(() => ServiceConfigurationFileHandler.Load(filePath));
+        var result = ServiceConfigurationFileHandler.Load(filePath);
+
+        Assert.That(result.IsSuccess, Is.False);
     }
 
     [Test]
-    public void Load_WithInvalidServiceName_ThrowsValidationException()
+    public void Load_WithInvalidServiceName_ReturnsFailure()
     {
         var filePath = GetTempFilePath();
         var invalidConfig = new
@@ -218,12 +232,14 @@ public class ServiceConfigurationFileHandlerTests
         var json = JsonSerializer.Serialize(invalidConfig, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(filePath, json);
 
-        Assert.Throws<ServiceConfigurationValidationException>(
-            () => ServiceConfigurationFileHandler.Load(filePath));
+        var result = ServiceConfigurationFileHandler.Load(filePath);
+
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorMessage, Does.Contain("ServiceName"));
     }
 
     [Test]
-    public void Load_WithPathTraversalInCommand_ThrowsValidationException()
+    public void Load_WithPathTraversalInCommand_ReturnsFailure()
     {
         var filePath = GetTempFilePath();
         var invalidConfig = new
@@ -238,12 +254,14 @@ public class ServiceConfigurationFileHandlerTests
         var json = JsonSerializer.Serialize(invalidConfig, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(filePath, json);
 
-        Assert.Throws<ServiceConfigurationValidationException>(
-            () => ServiceConfigurationFileHandler.Load(filePath));
+        var result = ServiceConfigurationFileHandler.Load(filePath);
+
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorMessage, Does.Contain("path traversal"));
     }
 
     [Test]
-    public void Load_WithEmptyServiceName_ThrowsValidationException()
+    public void Load_WithEmptyServiceName_ReturnsFailure()
     {
         var filePath = GetTempFilePath();
         var invalidConfig = new
@@ -258,7 +276,22 @@ public class ServiceConfigurationFileHandlerTests
         var json = JsonSerializer.Serialize(invalidConfig, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(filePath, json);
 
-        Assert.Throws<ServiceConfigurationValidationException>(
-            () => ServiceConfigurationFileHandler.Load(filePath));
+        var result = ServiceConfigurationFileHandler.Load(filePath);
+
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorMessage, Does.Contain("ServiceName"));
+    }
+
+    // --- New tests for Result pattern ---
+
+    [Test]
+    public void Load_WithNullJsonContent_ReturnsFailure()
+    {
+        var filePath = GetTempFilePath();
+        File.WriteAllText(filePath, "null");
+
+        var result = ServiceConfigurationFileHandler.Load(filePath);
+
+        Assert.That(result.IsSuccess, Is.False);
     }
 }

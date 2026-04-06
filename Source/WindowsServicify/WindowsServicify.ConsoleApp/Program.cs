@@ -47,7 +47,14 @@ if (runningInConsole)
 
     if (parameters.Testrun)
     {
-        var configData = ServiceConfigurationFileHandler.Load(configurationFilePath);
+        var configResult = ServiceConfigurationFileHandler.Load(configurationFilePath);
+        if (!configResult.IsSuccess)
+        {
+            Console.WriteLine(configResult.ErrorMessage);
+            return;
+        }
+
+        var configData = configResult.Value;
         using var processLogger = new ProcessLogger(ExecutablePathHelper.GetExecutablePath());
         var processManager = new ProcessManager(configData.Command, configData.WorkingDirectory, configData.Arguments,
             processLogger);
@@ -80,7 +87,14 @@ if (runningInConsole)
     return;
 }
 
-var configuration = ServiceConfigurationFileHandler.Load(configurationFilePath);
+var configurationResult = ServiceConfigurationFileHandler.Load(configurationFilePath);
+if (!configurationResult.IsSuccess)
+{
+    Console.Error.WriteLine(configurationResult.ErrorMessage);
+    Environment.Exit(1);
+}
+
+var configuration = configurationResult.Value;
 
 using IHost host = Host.CreateDefaultBuilder(args)
     .UseWindowsService(options =>
@@ -112,18 +126,34 @@ using IHost host = Host.CreateDefaultBuilder(args)
 
 await host.RunAsync();
 
-static void InstallService(string configurationFilePath, bool legacy)
+static bool InstallService(string configurationFilePath, bool legacy)
 {
     var installHelper = WindowsServiceInstallHelperFactory.Create(legacy);
 
-    var configData = ServiceConfigurationFileHandler.Load(configurationFilePath);
+    var configResult = ServiceConfigurationFileHandler.Load(configurationFilePath);
+    if (!configResult.IsSuccess)
+    {
+        Console.WriteLine(configResult.ErrorMessage);
+        return false;
+    }
+
+    var configData = configResult.Value;
     installHelper.InstallService(configData.ServiceName, configData.DisplayName, configData.Description, ExecutablePathHelper.GetExecutableFilePath()!);
+    return true;
 }
 
-static void RemoveService(string configurationFilePath, bool legacy)
+static bool RemoveService(string configurationFilePath, bool legacy)
 {
     var installHelper = WindowsServiceInstallHelperFactory.Create(legacy);
 
-    var configData = ServiceConfigurationFileHandler.Load(configurationFilePath);
+    var configResult = ServiceConfigurationFileHandler.Load(configurationFilePath);
+    if (!configResult.IsSuccess)
+    {
+        Console.WriteLine(configResult.ErrorMessage);
+        return false;
+    }
+
+    var configData = configResult.Value;
     installHelper.RemoveService(configData.ServiceName);
+    return true;
 }

@@ -8,9 +8,9 @@ public static partial class ServiceConfigurationValidator
 
     /// <summary>
     /// Validates all fields of a ServiceConfiguration.
-    /// Throws ServiceConfigurationValidationException if any field is invalid.
+    /// Returns a Result indicating success or failure with error details.
     /// </summary>
-    public static void Validate(ServiceConfiguration configuration)
+    public static Result<ServiceConfiguration> Validate(ServiceConfiguration configuration)
     {
         var errors = new List<string>();
 
@@ -21,8 +21,11 @@ public static partial class ServiceConfigurationValidator
 
         if (errors.Count > 0)
         {
-            throw new ServiceConfigurationValidationException(errors);
+            var message = "Service configuration is invalid:\n" + string.Join("\n", errors);
+            return Result<ServiceConfiguration>.Failure(message);
         }
+
+        return Result<ServiceConfiguration>.Success(configuration);
     }
 
     private static void ValidateRequiredSafeName(List<string> errors, string fieldName, string? value)
